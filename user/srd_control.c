@@ -1,7 +1,8 @@
 /*
- * srd_control.c
+ * 	FileName:	srd_control.c
+ * 	Project:	SRD_xs
  *
- *  Created on: 2017Äê12ÔÂ28ÈÕ
+ *  Created on: 2018/1/16
  *      Author: yangxiaosheng
  */
 #include "DSP28x_Project.h"     			// Device Headerfile and Examples Include File
