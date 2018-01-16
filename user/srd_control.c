@@ -39,13 +39,14 @@ int16  FIRST_RUN	= 1;		// 1 means first run
 int16  I_error		= 0;
 int16  I_abs		= 0;
 
-int16  Expect_SPEED	= 500;		// 1 means the Expect Speed is 1r/min
+int16  Expect_SPEED	= 1500;		// 1 means the Expect Speed is 1r/min
 int16  Expect_I		= 0;		// be used in pid_control()
-int16  MAX_SPEED	= 1500;		// 1 means the MAX Speed is 1r/min
+int16  MAX_SPEED	= 2000;		// 1 means the MAX Speed is 1r/min
 int16  MAX_U		= 1447;		// 1447 means the MAX U is about 350V
-int16  MAX_I		= 50;		// 50 means the MAX I is about 3A
+int16  MAX_I		= 100;		// 50 means the MAX I is about 3A
 int16  Start_I		= 25;		// for first run
 int16  hysteresis 	= 2;		// be used in hysteresis_control()
+int16 SRM_PHASE,bit_speed=200,phase_on=50,phase_off=50;
 
 
 void my_init_srd(void);
@@ -242,9 +243,9 @@ void get_position(void)
 	else
 	{
 		if(SRM_SPEED>0)
-			SRM_ANGLE = SRM_STATE + SRM_SPEED*3*CpuTimer0.InterruptCount/50000;		// for SRM_ANGLE, 10 means 1deg; for SRM_SPEED, 20 menas 1r/min.
+			SRM_ANGLE = SRM_STATE + SRM_SPEED*3*CpuTimer0.InterruptCount/2000;		// for SRM_ANGLE, 10 means 1deg; for SRM_SPEED, 20 menas 1r/min.
 		else
-			SRM_ANGLE = SRM_STATE - (-SRM_SPEED)*3*CpuTimer0.InterruptCount/50000;	// there are some problem in the sign of data type
+			SRM_ANGLE = SRM_STATE - (-SRM_SPEED)*3*CpuTimer0.InterruptCount/2000;	// there are some problem in the sign of data type
 
 		if		(SRM_ANGLE > (SRM_STATE + 75))		SRM_ANGLE = (SRM_STATE + 75);
 		else if	(SRM_ANGLE < (SRM_STATE - 75))		SRM_ANGLE = (SRM_STATE - 75);
@@ -256,7 +257,7 @@ void get_position(void)
 void phase_control(void)
 {
 	//NOW_state=1 means La max, NOW_state=3 means Lb max, NOW_state=5 means Lc max, phase A must be connected to U, B to V, C to W.
-	if(SRM_SPEED>=0)
+	if(SRM_SPEED>=0 && SRM_SPEED<=bit_speed)
 	{
 		if		(NOW_state == 0) IGBT_H = PU_H;
 		else if	(NOW_state == 2) IGBT_H = PV_H;
@@ -274,16 +275,20 @@ void phase_control(void)
 		else if	(FIRST_RUN ==1 && NOW_state == 1 ) 	IGBT_L = PW_L;
 		else 										IGBT_L = -1;
 	}
-/*	else
+	else if(SRM_SPEED>bit_speed)
 	{
-		if		(NOW_state == 0 || NOW_state == 1 ) IGBT_H = PU_H;
-		else if	(NOW_state == 2 || NOW_state == 3 ) IGBT_H = PV_H;
-		else if	(NOW_state == 4 || NOW_state == 5 ) IGBT_H = PW_H;
-		if		(NOW_state == 3 || NOW_state == 4 ) IGBT_L = PU_L;
-		else if	(NOW_state == 5 || NOW_state == 0 ) IGBT_L = PV_L;
-		else if	(NOW_state == 1 || NOW_state == 2 ) IGBT_L = PW_L;
-	}*/
-
+		SRM_PHASE = SRM_ANGLE%75;
+		switch(NOW_state)
+		{
+		case 0:if(SRM_PHASE<=phase_off){IGBT_H=PU_H;IGBT_L=PV_L;}else IGBT_H=IGBT_L=-1;break;
+		case 1:if(SRM_PHASE>=phase_on){IGBT_H=PV_H;IGBT_L=PW_L;}else IGBT_H=IGBT_L=-1;break;
+		case 2:if(SRM_PHASE<=phase_off){IGBT_H=PV_H;IGBT_L=PW_L;}else IGBT_H=IGBT_L=-1;break;
+		case 3:if(SRM_PHASE>=phase_on){IGBT_H=PW_H;IGBT_L=PU_L;}else IGBT_H=IGBT_L=-1;break;
+		case 4:if(SRM_PHASE<=phase_off){IGBT_H=PW_H;IGBT_L=PU_L;}else IGBT_H=IGBT_L=-1;break;
+		case 5:if(SRM_PHASE>=phase_on){IGBT_H=PU_H;IGBT_L=PV_L;}else IGBT_H=IGBT_L=-1;break;
+		default:IGBT_H=IGBT_L=-1;break;
+		}
+	}
 }
 
 void pid_control(void)

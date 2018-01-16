@@ -58,7 +58,7 @@ __interrupt void cpu_timer1_isr(void)
    if(done==0&&FIRST_RUN==0)
    {
 	   CpuTimer1.InterruptCount++;
-	   data[CpuTimer1.InterruptCount] 	= I_abs;
+	   data[CpuTimer1.InterruptCount] 	= SRM_ANGLE;
 //	   data1[CpuTimer1.InterruptCount] 	= SRM_STATE;
    }
    if(CpuTimer1.InterruptCount>=5000)done=1;
