@@ -39,9 +39,9 @@ int16  FIRST_RUN	= 1;		// 1 means first run
 int16  I_error		= 0;
 int16  I_abs		= 0;
 
-int16  Expect_SPEED	= 1500;		// 1 means the Expect Speed is 1r/min
+int16  Expect_SPEED	= 1200;		// 1 means the Expect Speed is 1r/min
 int16  Expect_I		= 0;		// be used in pid_control()
-int16  MAX_SPEED	= 2000;		// 1 means the MAX Speed is 1r/min
+int16  MAX_SPEED	= 1800;		// 1 means the MAX Speed is 1r/min
 int16  MAX_U		= 1447;		// 1447 means the MAX U is about 350V
 int16  MAX_I		= 100;		// 50 means the MAX I is about 3A
 int16  Start_I		= 25;		// for first run
