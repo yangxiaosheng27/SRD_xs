@@ -1,7 +1,7 @@
 # FIXED
 
 user/srd_adc.obj: ../user/srd_adc.c
-user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/DSP28x_Project.h
+user/srd_adc.obj: ../user/SRD_Project.h
 user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_typedefs.h
 user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Device.h
 user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Adc.h
@@ -34,10 +34,9 @@ user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c_defines.h
 user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma_defines.h
 user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_defines.h
 user/srd_adc.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h
-user/srd_adc.obj: ../user/SRD_Project.h
 
 ../user/srd_adc.c: 
-D:/ti/workspace_v6/SRD_xs/inc/DSP28x_Project.h: 
+../user/SRD_Project.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_typedefs.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Device.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Adc.h: 
@@ -70,4 +69,3 @@ D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c_defines.h:
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma_defines.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_defines.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h: 
-../user/SRD_Project.h: 

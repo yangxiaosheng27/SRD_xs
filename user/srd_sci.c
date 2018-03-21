@@ -6,7 +6,6 @@
  *  Author: 	yangxiaosheng
  */
 
-#include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
 #include "SRD_Project.h"        // User's Funtions
 
 
