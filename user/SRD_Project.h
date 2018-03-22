@@ -17,7 +17,7 @@ extern void my_init_adc(void);
 extern void get_AD_offset(void);
 extern void my_init_cputimer(void);
 extern void my_init_gpio(void);
-extern void my_init_srd(void);
+extern void Init_SRD(void);
 extern void error_checking(void);
 extern void get_state(void);
 extern void get_position(void);
@@ -56,6 +56,9 @@ extern int16  FIRST_RUN;		// 1 means first run
 extern int16  I_error;
 extern int16  I_abs;
 extern int16  Expect_I;
+extern int16  MAX_SPEED;
+extern int16  MAX_U;
+extern int16  MAX_I;
 
 #define PU_H 	1
 #define PU_L 	2

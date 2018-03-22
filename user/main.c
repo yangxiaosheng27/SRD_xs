@@ -16,7 +16,7 @@ main()
 	IER = 0x0000;			// Disable CPU interrupts
 	IFR = 0x0000;			// clear all CPU interrupt flags
 	InitPieVectTable();		// Initialize the PIE vector table with pointers to the shell Interrupt	my_init_srd();
-	my_init_srd();			// Initialize the SRM
+	Init_SRD();				// Initialize the SRM
 	EINT;          			// Enable Global interrupt INTM
 	ERTM;          			// Enable Global realtime interrupt DBGM
 

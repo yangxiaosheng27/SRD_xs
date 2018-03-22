@@ -38,8 +38,10 @@ ORDERED_OBJS += \
 "./user/main.obj" \
 "./user/srd_adc.obj" \
 "./user/srd_control.obj" \
+"./user/srd_error.obj" \
 "./user/srd_gpio.obj" \
 "./user/srd_sci.obj" \
+"./user/srd_sensor.obj" \
 "./user/srd_timer.obj" \
 "../cmd/28069_RAM_lnk.cmd" \
 "../cmd/F2806x_Headers_nonBIOS.cmd" \
@@ -193,8 +195,8 @@ SRD_xs.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)$(BIN_OUTPUTS__QUOTED)
-	-$(RM) "src\F2806x_Adc.d" "src\F2806x_Comp.d" "src\F2806x_CpuTimers.d" "src\F2806x_DefaultIsr.d" "src\F2806x_Dma.d" "src\F2806x_ECan.d" "src\F2806x_ECap.d" "src\F2806x_EPwm.d" "src\F2806x_EQep.d" "src\F2806x_GlobalVariableDefs.d" "src\F2806x_Gpio.d" "src\F2806x_HRCap.d" "src\F2806x_I2C.d" "src\F2806x_Mcbsp.d" "src\F2806x_OscComp.d" "src\F2806x_PieCtrl.d" "src\F2806x_PieVect.d" "src\F2806x_Sci.d" "src\F2806x_Spi.d" "src\F2806x_SysCtrl.d" "src\F2806x_TempSensorConv.d" "user\main.d" "user\srd_adc.d" "user\srd_control.d" "user\srd_gpio.d" "user\srd_sci.d" "user\srd_timer.d" 
-	-$(RM) "src\F2806x_Adc.obj" "src\F2806x_CodeStartBranch.obj" "src\F2806x_Comp.obj" "src\F2806x_CpuTimers.obj" "src\F2806x_DBGIER.obj" "src\F2806x_DefaultIsr.obj" "src\F2806x_DisInt.obj" "src\F2806x_Dma.obj" "src\F2806x_ECan.obj" "src\F2806x_ECap.obj" "src\F2806x_EPwm.obj" "src\F2806x_EQep.obj" "src\F2806x_GlobalVariableDefs.obj" "src\F2806x_Gpio.obj" "src\F2806x_HRCap.obj" "src\F2806x_I2C.obj" "src\F2806x_Mcbsp.obj" "src\F2806x_OscComp.obj" "src\F2806x_PieCtrl.obj" "src\F2806x_PieVect.obj" "src\F2806x_Sci.obj" "src\F2806x_Spi.obj" "src\F2806x_SysCtrl.obj" "src\F2806x_TempSensorConv.obj" "src\F2806x_usDelay.obj" "user\main.obj" "user\srd_adc.obj" "user\srd_control.obj" "user\srd_gpio.obj" "user\srd_sci.obj" "user\srd_timer.obj" 
+	-$(RM) "src\F2806x_Adc.d" "src\F2806x_Comp.d" "src\F2806x_CpuTimers.d" "src\F2806x_DefaultIsr.d" "src\F2806x_Dma.d" "src\F2806x_ECan.d" "src\F2806x_ECap.d" "src\F2806x_EPwm.d" "src\F2806x_EQep.d" "src\F2806x_GlobalVariableDefs.d" "src\F2806x_Gpio.d" "src\F2806x_HRCap.d" "src\F2806x_I2C.d" "src\F2806x_Mcbsp.d" "src\F2806x_OscComp.d" "src\F2806x_PieCtrl.d" "src\F2806x_PieVect.d" "src\F2806x_Sci.d" "src\F2806x_Spi.d" "src\F2806x_SysCtrl.d" "src\F2806x_TempSensorConv.d" "user\main.d" "user\srd_adc.d" "user\srd_control.d" "user\srd_error.d" "user\srd_gpio.d" "user\srd_sci.d" "user\srd_sensor.d" "user\srd_timer.d" 
+	-$(RM) "src\F2806x_Adc.obj" "src\F2806x_CodeStartBranch.obj" "src\F2806x_Comp.obj" "src\F2806x_CpuTimers.obj" "src\F2806x_DBGIER.obj" "src\F2806x_DefaultIsr.obj" "src\F2806x_DisInt.obj" "src\F2806x_Dma.obj" "src\F2806x_ECan.obj" "src\F2806x_ECap.obj" "src\F2806x_EPwm.obj" "src\F2806x_EQep.obj" "src\F2806x_GlobalVariableDefs.obj" "src\F2806x_Gpio.obj" "src\F2806x_HRCap.obj" "src\F2806x_I2C.obj" "src\F2806x_Mcbsp.obj" "src\F2806x_OscComp.obj" "src\F2806x_PieCtrl.obj" "src\F2806x_PieVect.obj" "src\F2806x_Sci.obj" "src\F2806x_Spi.obj" "src\F2806x_SysCtrl.obj" "src\F2806x_TempSensorConv.obj" "src\F2806x_usDelay.obj" "user\main.obj" "user\srd_adc.obj" "user\srd_control.obj" "user\srd_error.obj" "user\srd_gpio.obj" "user\srd_sci.obj" "user\srd_sensor.obj" "user\srd_timer.obj" 
 	-$(RM) "src\F2806x_CodeStartBranch.d" "src\F2806x_DBGIER.d" "src\F2806x_DisInt.d" "src\F2806x_usDelay.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
