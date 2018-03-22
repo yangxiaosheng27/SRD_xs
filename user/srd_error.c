@@ -10,6 +10,8 @@
 
 void error_checking(void);
 
+Uint16 ERROR		= 0;
+
 void error_checking(void)
 {
 	if(IU_offset<1800||IU_offset>1900)											ERROR |= 0x0001;
