@@ -117,6 +117,7 @@ SECTIONS
    #endif
 #endif 
    
+   .text            : > RAML0_L3,   PAGE = 0
    .cinit           : > RAMM0,      PAGE = 0
    .pinit           : > RAMM0,      PAGE = 0
    .switch          : > RAMM0,      PAGE = 0
