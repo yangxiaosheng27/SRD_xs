@@ -30,7 +30,7 @@ int16  SRM_ANGLE	= 0;		// 10 means 1deg, 1800 means 180deg
 int16  SRM_STATE	= 0;		// 10 means 1deg, 1800 means 180deg
 int16  NOW_state	= -1;		// -1 means first run
 int16  LAST_state	= -1;		// -1 means first run
-int16  LAST_state_test;			// for test
+//int16  LAST_state_test;			// for test
 int16  DRV_state	= -1;
 
 void get_state(void)
@@ -58,12 +58,12 @@ void get_position(void)
 	static int16 max_dir_test 	= 0;		//test by yxs
 	static int16 time_test 		= 0;		//test by yxs*/
 
-	if 		(PA_state == 0 && PB_state == 0 && PC_state == 1)temp_state = 0;	//CA
-	else if (PA_state == 1 && PB_state == 0 && PC_state == 1)temp_state = 1;	//A
-	else if (PA_state == 1 && PB_state == 0 && PC_state == 0)temp_state = 2;	//AB
-	else if (PA_state == 1 && PB_state == 1 && PC_state == 0)temp_state = 3;	//B
-	else if (PA_state == 0 && PB_state == 1 && PC_state == 0)temp_state = 4;	//BC
-	else if (PA_state == 0 && PB_state == 1 && PC_state == 1)temp_state = 5;	//C
+	if 		(PA_state == 0 && PB_state == 0 && PC_state == 1)temp_state = 5;	//CA
+	else if (PA_state == 1 && PB_state == 0 && PC_state == 1)temp_state = 4;	//A
+	else if (PA_state == 1 && PB_state == 0 && PC_state == 0)temp_state = 3;	//AB
+	else if (PA_state == 1 && PB_state == 1 && PC_state == 0)temp_state = 2;	//B
+	else if (PA_state == 0 && PB_state == 1 && PC_state == 0)temp_state = 1;	//BC
+	else if (PA_state == 0 && PB_state == 1 && PC_state == 1)temp_state = 0;	//C
 
 /*	else
 	{	//error state, but sometime it is exist...
@@ -82,7 +82,7 @@ void get_position(void)
 	if(temp_state!=LAST_state && temp_state==last_temp)
 	{
 		count_temp++;
-		if(count_temp>=25)
+		if(count_temp>=5)/////////////note!/////////////////////////////////////////////////////////
 		{
 			count_temp=0;
 			NOW_state = temp_state;

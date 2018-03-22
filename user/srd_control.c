@@ -47,11 +47,11 @@ void Init_SRD(void)
 	SS_UP;					//H is disaable
 	FAN_UP;					//H is disaable
 
-//	DELAY_US(1000*1000);
+	DELAY_US(1000*1000);
 	SS_DN;					//L is enable
 	FAN_DN;					//L is enable
 
-	DELAY_US(3000000L);
+	DELAY_US(1000000L);
 	my_init_adc();
 	error_checking();
 	my_init_cputimer();
@@ -62,32 +62,14 @@ void phase_control(void)
 	//NOW_state=1 means La max, NOW_state=3 means Lb max, NOW_state=5 means Lc max, phase A must be connected to U, B to V, C to W.
 	if(SRM_SPEED>=0)
 	{
-		if		(NOW_state == 0) IGBT_H = PU_H;
-		else if	(NOW_state == 2) IGBT_H = PV_H;
-		else if	(NOW_state == 4) IGBT_H = PW_H;
-		else if	(FIRST_RUN ==1 && NOW_state == 5 ) 	IGBT_H = PU_H;
-		else if	(FIRST_RUN ==1 && NOW_state == 1 ) 	IGBT_H = PV_H;
-		else if	(FIRST_RUN ==1 && NOW_state == 3 ) 	IGBT_H = PW_H;
-		else 										IGBT_H = -1;
-
-		if		(NOW_state == 4) IGBT_L = PU_L;
-		else if	(NOW_state == 0) IGBT_L = PV_L;
-		else if	(NOW_state == 2) IGBT_L = PW_L;
-		else if	(FIRST_RUN ==1 && NOW_state == 3 ) 	IGBT_L = PU_L;
-		else if	(FIRST_RUN ==1 && NOW_state == 5 ) 	IGBT_L = PV_L;
-		else if	(FIRST_RUN ==1 && NOW_state == 1 ) 	IGBT_L = PW_L;
-		else 										IGBT_L = -1;
+		if		(NOW_state == 0){ IGBT_H = -1; 		IGBT_L = -1; }
+		else if	(NOW_state == 1){ IGBT_H = PU_H; 	IGBT_L = PV_L; }
+		else if	(NOW_state == 2){ IGBT_H = -1; 		IGBT_L = -1; }
+		else if	(NOW_state == 3){ IGBT_H = PW_H; 	IGBT_L = PU_L; }
+		else if	(NOW_state == 4){ IGBT_H = -1; 		IGBT_L = -1; }
+		else if	(NOW_state == 5){ IGBT_H = PV_H; 	IGBT_L = PW_L; }
+		else IGBT_H = IGBT_L = -1;
 	}
-/*	else
-	{
-		if		(NOW_state == 0 || NOW_state == 1 ) IGBT_H = PU_H;
-		else if	(NOW_state == 2 || NOW_state == 3 ) IGBT_H = PV_H;
-		else if	(NOW_state == 4 || NOW_state == 5 ) IGBT_H = PW_H;
-		if		(NOW_state == 3 || NOW_state == 4 ) IGBT_L = PU_L;
-		else if	(NOW_state == 5 || NOW_state == 0 ) IGBT_L = PV_L;
-		else if	(NOW_state == 1 || NOW_state == 2 ) IGBT_L = PW_L;
-	}*/
-
 }
 
 void pid_control(void)
@@ -160,6 +142,8 @@ void hysteresis_control(void)
 
 void output_control(void)
 {
+	static int16 last_IGBT_L=-1;
+
 	if(IGBT_H == PU_H && IGBT_L == PU_L)	{DRV_UP; PU_H_DN; PV_H_DN; PW_H_DN; PU_L_DN; PV_L_DN; PW_L_DN; FAN_UP; return;}
 	if(IGBT_H == PV_H && IGBT_L == PV_L)	{DRV_UP; PU_H_DN; PV_H_DN; PW_H_DN; PU_L_DN; PV_L_DN; PW_L_DN; FAN_UP; return;}
 	if(IGBT_H == PW_H && IGBT_L == PW_L)	{DRV_UP; PU_H_DN; PV_H_DN; PW_H_DN; PU_L_DN; PV_L_DN; PW_L_DN; FAN_UP; return;}
@@ -168,9 +152,9 @@ void output_control(void)
 	if(IGBT_H_switch == 1)
 	{
 		DRV_DN;	DRV_state=1;
-		if		(IGBT_H == PU_H)	{PV_H_DN; PW_H_DN; PU_H_UP;}
-		else if	(IGBT_H	== PV_H)	{PU_H_DN; PW_H_DN; PV_H_UP;}
-		else if	(IGBT_H	== PW_H)	{PU_H_DN; PV_H_DN; PW_H_UP;}
+		if		(IGBT_H == PU_H)	{PV_H_DN; PW_H_DN; if(last_IGBT_L!=PU_L)PU_H_UP;}
+		else if	(IGBT_H	== PV_H)	{PU_H_DN; PW_H_DN; if(last_IGBT_L!=PV_L)PV_H_UP;}
+		else if	(IGBT_H	== PW_H)	{PU_H_DN; PV_H_DN; if(last_IGBT_L!=PW_L)PW_H_UP;}
 		else
 		{
 			DRV_UP;	DRV_state=0;
@@ -195,12 +179,17 @@ void output_control(void)
 			DRV_UP;	DRV_state=0;
 			PV_L_DN; PW_L_DN; PU_L_DN;
 		}
+		last_IGBT_L = IGBT_L;
 	}
 	else
 	{
 		DRV_UP;	DRV_state=0;
 		PV_L_DN; PW_L_DN; PU_L_DN;
+
+		last_IGBT_L = -1;
 	}
+
+
 }
 
 //===========================================================================
