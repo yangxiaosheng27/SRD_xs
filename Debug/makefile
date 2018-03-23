@@ -182,7 +182,7 @@ all: SRD_xs.out
 SRD_xs.out: $(OBJS) $(CMD_SRCS) $(LIB_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: C2000 Linker'
-	"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/bin/cl2000" -v28 -ml -mt --vcu_support=vcu0 --cla_support=cla0 --float_support=fpu32 -g --display_error_number --diag_warning=225 --diag_wrap=off -z -m"SRD_xs.map" --stack_size=0x300 --warn_sections -i"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/lib" -i"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --xml_link_info="SRD_xs_linkInfo.xml" --rom_model -o "SRD_xs.out" $(ORDERED_OBJS)
+	"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/bin/cl2000" -v28 -ml -mt --vcu_support=vcu0 --cla_support=cla0 --float_support=fpu32 --advice:performance=all -g --display_error_number --diag_warning=225 --diag_wrap=off -z -m"SRD_xs.map" --stack_size=0x300 --heap_size=0x400 --warn_sections -i"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/lib" -i"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --xml_link_info="SRD_xs_linkInfo.xml" --rom_model -o "SRD_xs.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

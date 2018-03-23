@@ -7,6 +7,7 @@
  */
 
 #include "SRD_Project.h"        // User's Funtions
+#include <stdio.h>
 
 void error_checking(void);
 
@@ -45,6 +46,8 @@ void error_checking(void)
 		BR_UP;					//H is disaable
 		SS_UP;					//H is disaable
 		FAN_UP;					//H is disaable
+		printf("ERROR:0x%x!\n",ERROR);
+		scanf("%d",&ERROR);
 		while(1);
 	}
 }
