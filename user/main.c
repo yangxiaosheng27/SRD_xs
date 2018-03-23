@@ -6,7 +6,6 @@
  *  Author: 	yangxiaosheng
  */
 #include "SRD_Project.h"        // User's Funtions
-//#include <stdio.h>
 
 main()
 {
