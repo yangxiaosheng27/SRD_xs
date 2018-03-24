@@ -34,12 +34,11 @@ void output_control(void);
 void Init_SRD(void)
 {
 	my_init_gpio();			//fist run
-
 	DRV_UP;					//H is disaable
 	BR_UP;					//H is disaable
-
 	SS_UP;					//H is disaable
 	FAN_UP;					//H is disaable
+	my_init_pwm();
 
 	///////////////////////////////////////////////
 	DELAY_US(1000*1000);
@@ -50,7 +49,6 @@ void Init_SRD(void)
 	my_init_adc();
 	error_checking();
 	my_init_cputimer();
-	my_init_pwm();
 }
 
 void phase_control(void)

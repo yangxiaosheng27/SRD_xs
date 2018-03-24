@@ -10,9 +10,9 @@
 __interrupt void cpu_timer0_isr(void);		// Prototype statements for functions found within this file.
 __interrupt void cpu_timer1_isr(void);		// Prototype statements for functions found within this file.
 
-int16 done=0;
-int16 data[1000]={0};
-//int16 data1[3000]={0};
+int16 mycount=0;
+#pragma DATA_SECTION(mydata,"mydata");
+volatile int16 mydata[1000]={0};
 
 void my_init_cputimer()
 {
@@ -22,9 +22,9 @@ void my_init_cputimer()
    EDIS;    								// This is needed to disable write to EALLOW protected registers
    InitCpuTimers();   						// For this example, only initialize the Cpu Timers
    ConfigCpuTimer(&CpuTimer0, 90, 20);		// Configure CPU-Timer0, 90 is CPUFreq, 20 is uSeconds
-   ConfigCpuTimer(&CpuTimer1, 90, 1000);	// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
+   ConfigCpuTimer(&CpuTimer1, 90, 10);	// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
    IER |= M_INT1;							// Enable CPU int1 which is connected to CPU-Timer 0
-   IER |= M_INT13;							// Enable CPU int13 which is connected to CPU-Timer 1
+//   IER |= M_INT13;							// Enable CPU int13 which is connected to CPU-Timer 1
    PieCtrlRegs.PIEIER1.bit.INTx7 = 1;		// Enable TINT0 in the PIE: Group 1 interrupt 7
    CpuTimer0Regs.TCR.all = 0x4000; 			// Use write-only instruction to set TSS bit = 0
    CpuTimer1Regs.TCR.all = 0x4000; 			// Use write-only instruction to set TSS bit = 0
@@ -47,6 +47,14 @@ __interrupt void cpu_timer0_isr(void)
 	error_checking();
 
 
+	if(mycount<=1000)
+	{
+	   mycount++;
+	   mydata[mycount] 	= IU_ad;
+	}
+	else
+		mycount=0;
+
 	// Acknowledge this interrupt to receive more interrupts from group 1
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
@@ -54,13 +62,6 @@ __interrupt void cpu_timer0_isr(void)
 
 __interrupt void cpu_timer1_isr(void)
 {
-   if(done==0&&FIRST_RUN==0)
-   {
-	   CpuTimer1.InterruptCount++;
-	   data[CpuTimer1.InterruptCount] 	= I_abs;
-//	   data1[CpuTimer1.InterruptCount] 	= SRM_STATE;
-   }
-   if(CpuTimer1.InterruptCount>=5000)done=1;
 
 }
 //===========================================================================

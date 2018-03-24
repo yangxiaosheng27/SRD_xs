@@ -35,7 +35,6 @@ void my_init_pwm()
 
 void InitEPwm1Regs()
 {
-
    // Setup TBCLK
    EPwm1Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
    EPwm1Regs.TBPRD = 1000;       // Set timer period
@@ -65,9 +64,59 @@ void InitEPwm1Regs()
 
 void InitEPwm2Regs()
 {
+	// Setup TBCLK
+	EPwm2Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
+	EPwm2Regs.TBPRD = 1000;       // Set timer period
+	EPwm2Regs.TBCTL.bit.PHSEN = TB_DISABLE;    // Disable phase loading
+	EPwm2Regs.TBPHS.half.TBPHS = 0x0000;       // Phase is 0
+	EPwm2Regs.TBCTR = 0x0000;                  // Clear counter
+	EPwm2Regs.TBCTL.bit.HSPCLKDIV = TB_DIV2;   // Clock ratio to SYSCLKOUT
+	EPwm2Regs.TBCTL.bit.CLKDIV = TB_DIV2;
+
+	// Setup shadow register load on ZERO
+	EPwm2Regs.CMPCTL.bit.SHDWAMODE = CC_SHADOW;
+	EPwm2Regs.CMPCTL.bit.SHDWBMODE = CC_SHADOW;
+	EPwm2Regs.CMPCTL.bit.LOADAMODE = CC_CTR_ZERO;
+	EPwm2Regs.CMPCTL.bit.LOADBMODE = CC_CTR_ZERO;
+
+	// Set Compare values
+	EPwm2Regs.CMPA.half.CMPA = 0;    // Set compare A value
+	EPwm2Regs.CMPB = 0;              // Set Compare B value
+
+	// Set actions
+	EPwm2Regs.AQCTLA.bit.ZRO = AQ_SET;            // Set PWM1A on Zero
+	EPwm2Regs.AQCTLA.bit.CAU = AQ_CLEAR;          // Clear PWM1A on event A, up count
+
+	EPwm2Regs.AQCTLB.bit.ZRO = AQ_SET;            // Set PWM1B on Zero
+	EPwm2Regs.AQCTLB.bit.CBU = AQ_CLEAR;          // Clear PWM1B on event B, up count
 }
 
 void InitEPwm3Regs()
 {
+	// Setup TBCLK
+	EPwm3Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
+	EPwm3Regs.TBPRD = 1000;       // Set timer period
+	EPwm3Regs.TBCTL.bit.PHSEN = TB_DISABLE;    // Disable phase loading
+	EPwm3Regs.TBPHS.half.TBPHS = 0x0000;       // Phase is 0
+	EPwm3Regs.TBCTR = 0x0000;                  // Clear counter
+	EPwm3Regs.TBCTL.bit.HSPCLKDIV = TB_DIV2;   // Clock ratio to SYSCLKOUT
+	EPwm3Regs.TBCTL.bit.CLKDIV = TB_DIV2;
+
+	// Setup shadow register load on ZERO
+	EPwm3Regs.CMPCTL.bit.SHDWAMODE = CC_SHADOW;
+	EPwm3Regs.CMPCTL.bit.SHDWBMODE = CC_SHADOW;
+	EPwm3Regs.CMPCTL.bit.LOADAMODE = CC_CTR_ZERO;
+	EPwm3Regs.CMPCTL.bit.LOADBMODE = CC_CTR_ZERO;
+
+	// Set Compare values
+	EPwm3Regs.CMPA.half.CMPA = 0;    // Set compare A value
+	EPwm3Regs.CMPB = 0;              // Set Compare B value
+
+	// Set actions
+	EPwm3Regs.AQCTLA.bit.ZRO = AQ_SET;            // Set PWM1A on Zero
+	EPwm3Regs.AQCTLA.bit.CAU = AQ_CLEAR;          // Clear PWM1A on event A, up count
+
+	EPwm3Regs.AQCTLB.bit.ZRO = AQ_SET;            // Set PWM1B on Zero
+	EPwm3Regs.AQCTLB.bit.CBU = AQ_CLEAR;          // Clear PWM1B on event B, up count
 
 }

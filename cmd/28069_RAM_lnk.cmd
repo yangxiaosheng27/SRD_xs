@@ -134,7 +134,7 @@ SECTIONS
    /* Allocate FPU math areas: */
    FPUmathTables    : > FPUTABLES,  PAGE = 0, TYPE = NOLOAD
    
-   DMARAML6	        : > RAML6,      PAGE = 1
+   mydata	        : > RAML6,      PAGE = 1
    DMARAML7	        : > RAML7,      PAGE = 1
    DMARAML8	        : > RAML8,      PAGE = 1   
 
