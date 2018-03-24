@@ -39,9 +39,9 @@ __interrupt void cpu_timer0_isr(void)
 
 	get_state();
 	get_position();
-	phase_control();
-	pid_control();
-	hysteresis_control();
+//	phase_control();
+//	pid_control();
+//	hysteresis_control();
 
 
 	// checking
