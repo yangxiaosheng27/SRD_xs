@@ -9,6 +9,7 @@ C_SRCS += \
 ../user/srd_control.c \
 ../user/srd_error.c \
 ../user/srd_gpio.c \
+../user/srd_pwm.c \
 ../user/srd_sci.c \
 ../user/srd_sensor.c \
 ../user/srd_timer.c 
@@ -19,6 +20,7 @@ OBJS += \
 ./user/srd_control.obj \
 ./user/srd_error.obj \
 ./user/srd_gpio.obj \
+./user/srd_pwm.obj \
 ./user/srd_sci.obj \
 ./user/srd_sensor.obj \
 ./user/srd_timer.obj 
@@ -29,6 +31,7 @@ C_DEPS += \
 ./user/srd_control.d \
 ./user/srd_error.d \
 ./user/srd_gpio.d \
+./user/srd_pwm.d \
 ./user/srd_sci.d \
 ./user/srd_sensor.d \
 ./user/srd_timer.d 
@@ -39,6 +42,7 @@ C_DEPS__QUOTED += \
 "user\srd_control.d" \
 "user\srd_error.d" \
 "user\srd_gpio.d" \
+"user\srd_pwm.d" \
 "user\srd_sci.d" \
 "user\srd_sensor.d" \
 "user\srd_timer.d" 
@@ -49,6 +53,7 @@ OBJS__QUOTED += \
 "user\srd_control.obj" \
 "user\srd_error.obj" \
 "user\srd_gpio.obj" \
+"user\srd_pwm.obj" \
 "user\srd_sci.obj" \
 "user\srd_sensor.obj" \
 "user\srd_timer.obj" 
@@ -59,6 +64,7 @@ C_SRCS__QUOTED += \
 "../user/srd_control.c" \
 "../user/srd_error.c" \
 "../user/srd_gpio.c" \
+"../user/srd_pwm.c" \
 "../user/srd_sci.c" \
 "../user/srd_sensor.c" \
 "../user/srd_timer.c" 

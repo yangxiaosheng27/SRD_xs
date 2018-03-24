@@ -36,17 +36,12 @@ void Init_SRD(void)
 	my_init_gpio();			//fist run
 
 	DRV_UP;					//H is disaable
-	PU_H_DN;				//L is disaable
-	PU_L_DN;				//L is disaable
-	PV_H_DN;				//L is disaable
-	PV_L_DN;				//L is disaable
-	PW_H_DN;				//L is disaable
-	PW_L_DN;				//L is disaable
 	BR_UP;					//H is disaable
 
 	SS_UP;					//H is disaable
 	FAN_UP;					//H is disaable
 
+	///////////////////////////////////////////////
 	DELAY_US(1000*1000);
 	SS_DN;					//L is enable
 	FAN_DN;					//L is enable
@@ -55,6 +50,7 @@ void Init_SRD(void)
 	my_init_adc();
 	error_checking();
 	my_init_cputimer();
+	my_init_pwm();
 }
 
 void phase_control(void)
@@ -137,58 +133,6 @@ void hysteresis_control(void)
 		if(I_error > hysteresis)		IGBT_L_switch = 0; //0 means close IGBT
 		else if(I_error < -hysteresis)	IGBT_L_switch = 1; //1 means open IGBT
 	}
-
-}
-
-void output_control(void)
-{
-	static int16 last_IGBT_L=-1;
-
-	if(IGBT_H == PU_H && IGBT_L == PU_L)	{DRV_UP; PU_H_DN; PV_H_DN; PW_H_DN; PU_L_DN; PV_L_DN; PW_L_DN; FAN_UP; return;}
-	if(IGBT_H == PV_H && IGBT_L == PV_L)	{DRV_UP; PU_H_DN; PV_H_DN; PW_H_DN; PU_L_DN; PV_L_DN; PW_L_DN; FAN_UP; return;}
-	if(IGBT_H == PW_H && IGBT_L == PW_L)	{DRV_UP; PU_H_DN; PV_H_DN; PW_H_DN; PU_L_DN; PV_L_DN; PW_L_DN; FAN_UP; return;}
-
-
-	if(IGBT_H_switch == 1)
-	{
-		DRV_DN;	DRV_state=1;
-		if		(IGBT_H == PU_H)	{PV_H_DN; PW_H_DN; if(last_IGBT_L!=PU_L)PU_H_UP;}
-		else if	(IGBT_H	== PV_H)	{PU_H_DN; PW_H_DN; if(last_IGBT_L!=PV_L)PV_H_UP;}
-		else if	(IGBT_H	== PW_H)	{PU_H_DN; PV_H_DN; if(last_IGBT_L!=PW_L)PW_H_UP;}
-		else
-		{
-			DRV_UP;	DRV_state=0;
-			PV_H_DN; PW_H_DN; PU_H_DN;
-		}
-	}
-	else
-	{
-		DRV_UP;	DRV_state=0;
-		PV_H_DN; PW_H_DN; PU_H_DN;
-	}
-
-
-	if(IGBT_L_switch == 1)
-	{
-		DRV_DN;	DRV_state=1;
-		if		(IGBT_L == PU_L)	{PV_L_DN; PW_L_DN; PU_L_UP;}
-		else if	(IGBT_L	== PV_L)	{PU_L_DN; PW_L_DN; PV_L_UP;}
-		else if	(IGBT_L	== PW_L)	{PU_L_DN; PV_L_DN; PW_L_UP;}
-		else
-		{
-			DRV_UP;	DRV_state=0;
-			PV_L_DN; PW_L_DN; PU_L_DN;
-		}
-		last_IGBT_L = IGBT_L;
-	}
-	else
-	{
-		DRV_UP;	DRV_state=0;
-		PV_L_DN; PW_L_DN; PU_L_DN;
-
-		last_IGBT_L = -1;
-	}
-
 
 }
 

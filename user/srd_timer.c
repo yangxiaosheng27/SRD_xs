@@ -44,9 +44,9 @@ __interrupt void cpu_timer0_isr(void)
 //	hysteresis_control();
 
 
-	// checking
 	error_checking();
-	output_control();
+
+
 	// Acknowledge this interrupt to receive more interrupts from group 1
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }

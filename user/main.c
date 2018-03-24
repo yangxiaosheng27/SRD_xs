@@ -6,11 +6,9 @@
  *  Author: 	yangxiaosheng
  */
 #include "SRD_Project.h"        // User's Funtions
-//#include <stdio.h>
 
 main()
 {
-
 	InitSysCtrl();			// PLL, WatchDog, enable Peripheral Clocks
     DINT;    				// Disable Interrupts at the CPU level:
 	InitPieCtrl();			// Initialize the PIE control registers to their default state.
@@ -22,7 +20,10 @@ main()
 	EINT;          			// Enable Global interrupt INTM
 	ERTM;          			// Enable Global realtime interrupt DBGM
 
-	while(1);
+	while(1)
+	{
+
+	}
 }
 //===========================================================================
 // No more.

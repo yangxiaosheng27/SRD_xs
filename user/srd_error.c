@@ -30,24 +30,19 @@ void error_checking(void)
 	if(IGBT_H==PV_H && IGBT_L==PV_L)											ERROR |= 0x1000;
 	if(IGBT_H==PW_H && IGBT_L==PW_L)											ERROR |= 0x2000;
 	if(SRM_SPEED>MAX_SPEED||SRM_SPEED<-MAX_SPEED)								ERROR |= 0x4000;
-
 //	if(HOT_state == 1)
-	if(ERROR)
+
+
+/*	if(ERROR)
 	{
 		DINT;    				// Disable Interrupts at the CPU level:
 		CpuTimer0Regs.TCR.bit.TSS = 1;
 		DRV_UP;					//H is disaable
-		PU_H_DN;				//L is disaable
-		PU_L_DN;				//L is disaable
-		PV_H_DN;				//L is disaable
-		PV_L_DN;				//L is disaable
-		PW_H_DN;				//L is disaable
-		PW_L_DN;				//L is disaable
+
 		BR_UP;					//H is disaable
 		SS_UP;					//H is disaable
 		FAN_UP;					//H is disaable
 		printf("ERROR:0x%x!\n",ERROR);
-		scanf("%d",&ERROR);
 		while(1);
-	}
+	}*/
 }

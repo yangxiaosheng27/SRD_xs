@@ -17,6 +17,7 @@ extern void my_init_adc(void);
 extern void get_AD_offset(void);
 extern void my_init_cputimer(void);
 extern void my_init_gpio(void);
+extern void my_init_pwm();
 extern void Init_SRD(void);
 extern void error_checking(void);
 extern void get_state(void);
@@ -67,23 +68,6 @@ extern int16  MAX_I;
 #define PW_H 	5
 #define PW_L 	6
 
-#define PU_H_UP GpioDataRegs.GPASET.bit.GPIO0=1
-#define PU_H_DN GpioDataRegs.GPACLEAR.bit.GPIO0=1
-
-#define PU_L_UP GpioDataRegs.GPASET.bit.GPIO1=1
-#define PU_L_DN GpioDataRegs.GPACLEAR.bit.GPIO1=1
-
-#define PV_H_UP GpioDataRegs.GPASET.bit.GPIO2=1
-#define PV_H_DN GpioDataRegs.GPACLEAR.bit.GPIO2=1
-
-#define PV_L_UP GpioDataRegs.GPASET.bit.GPIO3=1
-#define PV_L_DN GpioDataRegs.GPACLEAR.bit.GPIO3=1
-
-#define PW_H_UP GpioDataRegs.GPASET.bit.GPIO4=1
-#define PW_H_DN GpioDataRegs.GPACLEAR.bit.GPIO4=1
-
-#define PW_L_UP GpioDataRegs.GPASET.bit.GPIO5=1
-#define PW_L_DN GpioDataRegs.GPACLEAR.bit.GPIO5=1
 
 #define BR_UP 	GpioDataRegs.GPASET.bit.GPIO13=1
 #define BR_DN 	GpioDataRegs.GPACLEAR.bit.GPIO13=1
