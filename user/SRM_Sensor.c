@@ -25,8 +25,10 @@ Uint16 IU_offset	= 0;
 Uint16 IV_offset	= 0;
 Uint16 DBVD_offset	= 0;
 Uint16 Ref3V_offset	= 0;
+
+int16  SRM_Direction= 0;
 int16  SRM_SPEED	= 0;		// 1 menas 1r/min, -1 menas -1r/min, 150 means 150r/min
-int16  Estimated_position	= 0;		// 10 means 1deg, 1800 means 180deg
+int16  SRM_PHASE	= 0;		// 10 means 1deg, 1800 means 180deg
 int16  SRM_ANGLE	= 0;		// 10 means 1deg, 1800 means 180deg
 int16  NOW_state	= -1;		// -1 means first run
 int16  LAST_state	= -1;		// -1 means first run
@@ -49,7 +51,6 @@ void Get_State(void)
 
 void Get_Position(void)
 {
-	static int16 direction 		= 0;
 	static int16 temp_state 	= 0;
 	static int16 last_temp 		= 0;
 	static int16 count_temp 	= 0;
@@ -69,7 +70,7 @@ void Get_Position(void)
 	if(temp_state!=LAST_state && temp_state==last_temp)
 	{
 		count_temp++;
-		if(count_temp>=5)/////////////note!/////////////////////////////////////////////////////////
+		if(count_temp>=3)/////////////note!/////////////////////////////////////////////////////////
 		{
 			count_temp=0;
 			NOW_state = temp_state;
@@ -82,16 +83,16 @@ void Get_Position(void)
 		last_temp = temp_state;
 	}
 
-	//get the directionection of SRM at the jump time
-	direction = NOW_state - LAST_state;
+	//get the SRM_Directionection of SRM at the jump time
+	SRM_Direction = NOW_state - LAST_state;
 
 	//calculate the SRM_ANGLE
-	if(direction)
+	if(SRM_Direction)
 	{
-		if(direction<=-5)		direction += 6;				//ensure direction == 1 or 0 or -1, direction means the directionection of SRM at the jump time
-		else if(direction>=5)	direction -= 6;
+		if(SRM_Direction<=-5)		SRM_Direction += 6;				//ensure SRM_Direction == 1 or 0 or -1, SRM_Direction means the SRM_Directionection of SRM at the jump time
+		else if(SRM_Direction>=5)	SRM_Direction -= 6;
 
-		SRM_ANGLE += 75 * direction;
+		SRM_ANGLE += 75 * SRM_Direction;
 		if(SRM_ANGLE >= 3600)	SRM_ANGLE -= 3600;
 		if(SRM_ANGLE < 0)		SRM_ANGLE += 3600;
 		LAST_state = NOW_state;
@@ -100,16 +101,16 @@ void Get_Position(void)
 
 	//if the sensor of SRM is error, set error flag
 	if(PA_state == 0 && PB_state == 0 && PC_state == 0)	SRM_ANGLE = -1;
-	if(direction <= -2 || direction >= 2)				SRM_ANGLE = -2;
+	if(SRM_Direction <= -2 || SRM_Direction >= 2)				SRM_ANGLE = -2;
 
 	//calculate the SRM_SPEED
-	if(direction)
+	if(SRM_Direction)
 	{
-		//one T0count means 20us, one direction means 7.5deg, so speed(r/min)=62500/T0count, SRM_SPEED=speed:
+		//one T0count means 20us, one SRM_Direction means 7.5deg, so speed(r/min)=62500/T0count, SRM_SPEED=speed:
 		if(CpuTimer0.InterruptCount>30000)CpuTimer0.InterruptCount=30000;
-		if(direction>0)	{SRM_SPEED = 62500/(int16)(CpuTimer0.InterruptCount);}
-		else		{SRM_SPEED = -62500/(int16)(CpuTimer0.InterruptCount);}
-		if(direction>0&&SRM_SPEED<0){SRM_ANGLE = -4;}			//set error flag
+		if(SRM_Direction>0)	{SRM_SPEED = 62500/(int16)(CpuTimer0.InterruptCount);}
+		else				{SRM_SPEED = -62500/(int16)(CpuTimer0.InterruptCount);}
+		if(SRM_Direction>0&&SRM_SPEED<0){SRM_ANGLE = -4;}			//set error flag
 		CpuTimer0.InterruptCount = 0;
 	}
 	else if(CpuTimer0.InterruptCount>30000)	//50000 means 1s
@@ -124,20 +125,18 @@ void Get_Position(void)
 
 
 	//calculate the Estimated_position
-	if(direction)
+	if(SRM_Direction)
 	{
-		Estimated_position = SRM_ANGLE;
+		SRM_PHASE = 0;
 	}
 	else
 	{
 		if(SRM_SPEED>0)
-			Estimated_position = SRM_ANGLE + SRM_SPEED*3*CpuTimer0.InterruptCount/50000;		// for Estimated_position, 10 means 1deg; for SRM_SPEED, 20 menas 1r/min.
+			SRM_PHASE = SRM_SPEED*3*CpuTimer0.InterruptCount/50000;		// for Estimated_position, 10 means 1deg; for SRM_SPEED, 20 menas 1r/min.
 		else
-			Estimated_position = SRM_ANGLE - (-SRM_SPEED)*3*CpuTimer0.InterruptCount/50000;	// there are some problem in the sign of data type
+			SRM_PHASE = -(-SRM_SPEED)*3*CpuTimer0.InterruptCount/50000;	// there are some problem in the sign of data type
 
-		if		(Estimated_position > (SRM_ANGLE + 75))		Estimated_position = (SRM_ANGLE + 75);
-		else if	(Estimated_position < (SRM_ANGLE - 75))		Estimated_position = (SRM_ANGLE - 75);
-		if		(SRM_ANGLE >= 3600)					Estimated_position -= 3600;
-		else if	(SRM_ANGLE < 0)						Estimated_position += 3600;
+		if		(SRM_PHASE > 75)		SRM_PHASE = 75;
+		else if	(SRM_PHASE < -75)		SRM_PHASE = -75;
 	}
 }

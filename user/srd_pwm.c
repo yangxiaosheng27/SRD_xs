@@ -28,6 +28,13 @@ void My_Init_PWM()
 	InitEPwm2Regs();
 	InitEPwm3Regs();
 
+	EPwm1Regs.CMPA.half.CMPA = 0;
+	EPwm1Regs.CMPB			 = 0;
+	EPwm2Regs.CMPA.half.CMPA = 0;
+	EPwm2Regs.CMPB			 = 0;
+	EPwm3Regs.CMPA.half.CMPA = 0;
+	EPwm3Regs.CMPB			 = 0;
+
 	EALLOW;
 	SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC = 1;
 	EDIS;

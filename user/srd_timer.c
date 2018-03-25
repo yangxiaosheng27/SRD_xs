@@ -21,7 +21,7 @@ void My_Init_Cputimer()
    EDIS;    								// This is needed to disable write to EALLOW protected registers
    InitCpuTimers();   						// For this example, only initialize the Cpu Timers
    ConfigCpuTimer(&CpuTimer0, 90, 20);		// Configure CPU-Timer0, 90 is CPUFreq, 20 is uSeconds
-   ConfigCpuTimer(&CpuTimer1, 90, 1000);		// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
+   ConfigCpuTimer(&CpuTimer1, 90, 400);		// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
    IER |= M_INT1;							// Enable CPU int1 which is connected to CPU-Timer 0
    IER |= M_INT13;							// Enable CPU int13 which is connected to CPU-Timer 1
    PieCtrlRegs.PIEIER1.bit.INTx7 = 1;		// Enable TINT0 in the PIE: Group 1 interrupt 7
@@ -46,18 +46,28 @@ __interrupt void cpu_timer0_isr(void)
 
 __interrupt void cpu_timer1_isr(void)
 {
-	CpuTimer1.InterruptCount++;
+/*	if(CpuTimer1.InterruptCount<=4)
+	{
+		CpuTimer1.InterruptCount++;
+		CURRENT.Expect += 5;
+	}
+	else
+	{
+		CpuTimer1.InterruptCount = 0;
+		CURRENT.Expect = 40;
+	}
+*/
 }
 
 
 #pragma DATA_SECTION(Samp_Data1,"SampData1");
-volatile int16 Samp_Data1[2000]={0};
+volatile int16 Samp_Data1[500]={0};
 #pragma DATA_SECTION(Samp_Data2,"SampData2");
-volatile int16 Samp_Data2[2000]={0};
+volatile int16 Samp_Data2[500]={0};
 void Sample1()
 {
 	static int16 Samp_count=0;
-	if(Samp_count<=2000)
+	if(Samp_count<=500)
 	{
 		Samp_count++;
 		Samp_Data1[Samp_count] = CURRENT.Error;
@@ -67,12 +77,12 @@ void Sample1()
 void Sample2()
 {
 	static int16 Samp_count=0;
-	if(Samp_count<=2000)
+	if(Samp_count<=500)
 	{
 		Samp_count++;
-		Samp_Data2[Samp_count] = CURRENT.PWM_Duty;
+		Samp_Data2[Samp_count] = IU_ad;
 	}
-	else Samp_count = 0;
+//	else Samp_count = 0;
 }
 
 

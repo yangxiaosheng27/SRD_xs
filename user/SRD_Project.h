@@ -26,40 +26,50 @@ extern void Get_Position(void);
 
 extern void Init_SRD(void);
 extern void Control_SRD(void);
+extern void IGBT_Control(void);
 extern void SPEED_Control(void);
 extern void TORQUE_Control(void);
 extern void CURRENT_Control(void);
-extern void OUTPUT_Control(void);
+extern void PWM_Control(void);
 
-
+struct IGBT_STRUCT{
+	int16	State;
+	int16	State_1;		// State_n means State*z^(-n)
+	int16	Turn;
+	int16	Count;
+};
 struct SPEED_STRUCT{
 	int16	Expect;
 	int16	MAX;
 	int16	Kp;
 	int16 	Kd;
 	int16 	Error;
+	int16 	Error_1;		// Error_n means Error*z^(-n)
 	int16 	Differential;
 };
-
 struct TORQUE_STRUCT{
 	int16  	Expect;
 	int16  	MAX;
 };
-
 struct CURRENT_STRUCT{
 	int16  	Expect;
 	int16  	MAX;
 	int16 	Kp;
 	int16 	Ki;
 	int16 	Error;
+	int16 	Error_1;
 	int16 	Sample;
 	int16 	Integral;
-	int16 	PWM_Duty;
+};
+struct PWM_STRUCT{
+	int16  	MAX;
+	int16 	Duty;
 };
 
 extern struct SPEED_STRUCT 		SPEED;
 extern struct TORQUE_STRUCT 	TORQUE;
 extern struct CURRENT_STRUCT	CURRENT;
+extern struct PWM_STRUCT		PWM;
 
 extern Uint16 IU_ad;
 extern Uint16 IV_ad;
@@ -81,11 +91,10 @@ extern Uint16 IV_offset;
 extern Uint16 DBVD_offset;
 extern Uint16 Ref3V_offset;
 
-extern Uint16 ERROR;
-
+extern int16  SRM_Direction;
 extern int16  SRM_SPEED;
 extern int16  SRM_ANGLE;
-extern int16  Estimated_position;
+extern int16  SRM_PHASE;
 
 #define PU_H 	1
 #define PU_L 	2
