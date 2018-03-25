@@ -1,41 +1,41 @@
 # FIXED
 
-user/srd_gpio.obj: ../user/srd_gpio.c
-user/srd_gpio.obj: ../user/SRD_Project.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_typedefs.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Device.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Adc.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_BootVars.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Comp.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_CpuTimers.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DevEmu.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_ECan.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_ECap.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_EPwm.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_EQep.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Gpio.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_HRCap.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Mcbsp.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_NmiIntrupt.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_PieCtrl.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_PieVect.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Spi.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Sci.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_SysCtrl.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Usb.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_XIntrupt.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Examples.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_GlobalPrototypes.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_EPwm_defines.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c_defines.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma_defines.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_defines.h
-user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h
+user/SRD_GPIO.obj: ../user/SRD_GPIO.c
+user/SRD_GPIO.obj: ../user/SRD_Project.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_typedefs.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Device.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Adc.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_BootVars.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Comp.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_CpuTimers.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DevEmu.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_ECan.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_ECap.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_EPwm.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_EQep.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Gpio.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_HRCap.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Mcbsp.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_NmiIntrupt.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_PieCtrl.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_PieVect.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Spi.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Sci.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_SysCtrl.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Usb.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_XIntrupt.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Examples.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_GlobalPrototypes.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_EPwm_defines.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c_defines.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma_defines.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_defines.h
+user/SRD_GPIO.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h
 
-../user/srd_gpio.c: 
+../user/SRD_GPIO.c: 
 ../user/SRD_Project.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_typedefs.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Device.h: 

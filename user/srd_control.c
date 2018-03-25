@@ -2,136 +2,112 @@
  * 	FileName:	srd_control.c
  * 	Project:	SRD_xs
  *
- *  Created on: 2018/1/16
- *      Author: yangxiaosheng
+ *  Created on: 2018/3/26
+ *  Author: 	yangxiaosheng
  */
-#include "SRD_Project.h"        			// User's Funtions
-
-// Global variables
-int16  IGBT_H		= -1;		// control after change phase
-int16  IGBT_L		= -1;		// control after change phase
-int16  IGBT_H_switch= 0;		// 0 means close IGBT, 1 means open IGBT
-int16  IGBT_L_switch= 0;		// 0 means close IGBT, 1 means open IGBT
-int16  FIRST_RUN	= 1;		// 1 means first run
-int16  I_error		= 0;
-int16  I_abs		= 0;
-
-int16  Expect_SPEED	= 500;		// 1 means the Expect Speed is 1r/min
-int16  Expect_I		= 0;		// be used in pid_control()
-int16  MAX_SPEED	= 1500;		// 1 means the MAX Speed is 1r/min
-int16  MAX_U		= 1447;		// 1447 means the MAX U is about 350V
-int16  MAX_I		= 50;		// 50 means the MAX I is about 3A
-int16  Start_I		= 25;		// for first run
-int16  hysteresis 	= 2;		// be used in hysteresis_control()
-
+#include "SRD_Project.h"        // User's Funtions
+#include <stdio.h>
 
 void Init_SRD(void);
-void phase_control(void);
-void pid_control(void);
-void hysteresis_control(void);
-void output_control(void);
+void SPEED_Control(void);
+void TORQUE_Control(void);
+void CURRENT_Control(void);
+void OUTPUT_Control(void);
+
+#define SPEED_Expect 	500		// 1000 means 1000	r/min
+#define SPEED_MAX		1500	// 1000 means 1000	r/min
+#define SPEED_Kp 		5
+#define SPEED_Kd 		0
+#define TORQUE_MAX 		2000	// 1000 means 1.000 N*m
+#define CURRENT_MAX		100		// 100 	means 6 	A
+#define CURRENT_Kp		5
+#define CURRENT_Ki		0
+
+
+struct SPEED_STRUCT 		SPEED;
+struct TORQUE_STRUCT 	TORQUE;
+struct CURRENT_STRUCT	CURRENT;
 
 void Init_SRD(void)
 {
-	my_init_gpio();			//fist run
+	My_Init_GPIO();			//fist run
 	DRV_UP;					//H is disaable
 	BR_UP;					//H is disaable
 	SS_UP;					//H is disaable
 	FAN_UP;					//H is disaable
-	my_init_pwm();
+	My_Init_PWM();
 
-	///////////////////////////////////////////////
-	DELAY_US(1000*1000);
+	//Init Control Parameters
+	SPEED.Expect 	= SPEED_Expect;
+	SPEED.MAX 		= SPEED_MAX;
+	SPEED.Kp 		= SPEED_Kp;
+	SPEED.Kd 		= SPEED_Kd;
+	TORQUE.MAX 		= TORQUE_MAX;
+	CURRENT.MAX 	= CURRENT_MAX;
+	CURRENT.Kp		= CURRENT_Kp;
+	CURRENT.Ki	 	= CURRENT_Ki;
+
+	printf("Hi,YangXiaoSheng!\nPlease press enter to start!\n");
+	getchar();
+	printf("Starting!\n");
+
 	SS_DN;					//L is enable
 	FAN_DN;					//L is enable
 
 	DELAY_US(1000000L);
-	my_init_adc();
-	error_checking();
-	my_init_cputimer();
+	My_Init_ADC();
+	Error_Checking();
+	My_Init_Cputimer();
 }
 
-void phase_control(void)
+void Control_SRD(void)
 {
-	//NOW_state=1 means La max, NOW_state=3 means Lb max, NOW_state=5 means Lc max, phase A must be connected to U, B to V, C to W.
-	if(SRM_SPEED>=0)
-	{
-		if		(NOW_state == 0){ IGBT_H = -1; 		IGBT_L = -1; }
-		else if	(NOW_state == 1){ IGBT_H = PU_H; 	IGBT_L = PV_L; }
-		else if	(NOW_state == 2){ IGBT_H = -1; 		IGBT_L = -1; }
-		else if	(NOW_state == 3){ IGBT_H = PW_H; 	IGBT_L = PU_L; }
-		else if	(NOW_state == 4){ IGBT_H = -1; 		IGBT_L = -1; }
-		else if	(NOW_state == 5){ IGBT_H = PV_H; 	IGBT_L = PW_L; }
-		else IGBT_H = IGBT_L = -1;
-	}
+	Get_State();
+	Get_Position();
+	SPEED_Control();
+	TORQUE_Control();
+	CURRENT_Control();
+	Error_Checking();
+	OUTPUT_Control();
 }
 
-void pid_control(void)
+void SPEED_Control(void)
 {
-	int16 speed_error = 0;
-	int16 Kp = 10;
-	speed_error =Expect_SPEED - SRM_SPEED;
-	Expect_I = speed_error*Kp/10;
-	if(Expect_SPEED>0&&speed_error>Expect_SPEED/3)
-	{
-		if(Expect_I > Start_I)	Expect_I = Start_I;
-	}
-	if(Expect_I > MAX_I)	Expect_I = MAX_I;
-	if(Expect_I < 0) 		Expect_I = 0;
+	SPEED.Error = SPEED.Expect - SRM_SPEED;
+	TORQUE.Expect = SPEED.Kp * SPEED.Error;
+
+	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX;
 }
 
-void hysteresis_control(void)
+void TORQUE_Control(void)
 {
-	if(IGBT_H == PU_H)
-	{
-		I_abs = IU_ad - IU_offset;
-		if(I_abs < 0)	I_abs = -I_abs;
-		I_error = I_abs - Expect_I;
-		if(I_error > hysteresis)		IGBT_H_switch = 0; //0 means close IGBT
-		else if(I_error < -hysteresis)	IGBT_H_switch = 1; //1 means open IGBT
-	}
-	else if(IGBT_H == PV_H)
-	{
-		I_abs = IV_ad - IV_offset;
-		if(I_abs < 0)	I_abs = -I_abs;
-		I_error = I_abs - Expect_I;
-		if(I_error > hysteresis)		IGBT_H_switch = 0; //0 means close IGBT
-		else if(I_error < -hysteresis)	IGBT_H_switch = 1; //1 means open IGBT
-	}
-	else if(IGBT_H == PW_H)
-	{
-		I_abs = (IU_ad - IU_offset) - (IV_ad - IV_offset);
-		if(I_abs < 0)	I_abs = -I_abs;
-		I_error = I_abs - Expect_I;
-		if(I_error > hysteresis)		IGBT_H_switch = 0; //0 means close IGBT
-		else if(I_error < -hysteresis)	IGBT_H_switch = 1; //1 means open IGBT
-	}
+	CURRENT.Expect = TORQUE.Expect*2;
 
-	if(IGBT_L == PU_L)
-	{
-		I_abs = IU_ad - IU_offset;
-		if(I_abs < 0)	I_abs = -I_abs;
-		I_error = I_abs - Expect_I;
-		if(I_error > hysteresis)		IGBT_L_switch = 0; //0 means close IGBT
-		else if(I_error < -hysteresis)	IGBT_L_switch = 1; //1 means open IGBT
-	}
-	else if(IGBT_L == PV_L)
-	{
-		I_abs = IV_ad - IV_offset;
-		if(I_abs < 0)	I_abs = -I_abs;
-		I_error = I_abs - Expect_I;
-		if(I_error > hysteresis)		IGBT_L_switch = 0; //0 means close IGBT
-		else if(I_error < -hysteresis)	IGBT_L_switch = 1; //1 means open IGBT
-	}
-	else if(IGBT_L == PW_L)
-	{
-		I_abs = (IU_ad - IU_offset) - (IV_ad - IV_offset);
-		if(I_abs < 0)	I_abs = -I_abs;
-		I_error = I_abs - Expect_I;
-		if(I_error > hysteresis)		IGBT_L_switch = 0; //0 means close IGBT
-		else if(I_error < -hysteresis)	IGBT_L_switch = 1; //1 means open IGBT
-	}
+	if(CURRENT.Expect > CURRENT.MAX) CURRENT.Expect= CURRENT.MAX;
+}
 
+void CURRENT_Control(void)		// CURRENT:0-100 means 0-6A, PWM_Duty:0-1000 means 0-100%
+{
+	CURRENT.Expect = 30;//for test
+
+	CURRENT.Sample = (int16)(IU_ad - IU_offset);
+
+	CURRENT.Error = CURRENT.Expect - CURRENT.Sample;
+	CURRENT.PWM_Duty = CURRENT.Kp * CURRENT.Error;
+	if(CURRENT.PWM_Duty<0) CURRENT.PWM_Duty = 0;
+	if(CURRENT.PWM_Duty>50) CURRENT.PWM_Duty = 50;
+}
+
+void OUTPUT_Control(void)
+{
+	EPwm1Regs.CMPA.half.CMPA = (Uint16)CURRENT.PWM_Duty;
+	EPwm2Regs.CMPA.half.CMPA = 0;
+	EPwm3Regs.CMPA.half.CMPA = 0;
+	EPwm1Regs.CMPB			 = 0;
+	EPwm2Regs.CMPB			 = 1000;
+	EPwm3Regs.CMPB			 = 0;
+
+	DRV_DN;					//L is enable
 }
 
 //===========================================================================

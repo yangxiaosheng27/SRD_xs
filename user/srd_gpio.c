@@ -2,12 +2,12 @@
  * 	FileName:	srd_gpio.c
  * 	Project:	SRD_xs
  *
- *  Created on: 2018/1/16
- *      Author: yangxiaosheng
+ *  Created on: 2018/3/26
+ *  Author: 	yangxiaosheng
  */
 #include "SRD_Project.h"        // User's Funtions
 
-void my_init_gpio()
+void My_Init_GPIO()
 {
 	InitGpio();
 
