@@ -15,12 +15,12 @@ void TORQUE_Control(void);
 void CURRENT_Control(void);
 void PWM_Control(void);
 
-#define SPEED_Expect 	500		// 1000 means 1000	r/min
-#define SPEED_MAX		1500	// 1000 means 1000	r/min
+#define SPEED_Expect 	800		// 1000 means 1000	r/min
+#define SPEED_MAX		1500		// 1000 means 1000	r/min
 #define SPEED_Kp 		2
 #define SPEED_Kd 		0
-#define TORQUE_MAX 		2000	// 1000 means 1.000 N*m
-#define CURRENT_MAX		100		// 100 	means 6 	A
+#define TORQUE_MAX 		2000		// 1000 means 1.000 N*m
+#define CURRENT_MAX		80			// 100 	means 6 	A
 #define CURRENT_Kp		50
 #define CURRENT_Ki		1
 #define PWM_Duty_MAX	1000		// 1000	means 100%
@@ -42,7 +42,7 @@ void Init_SRD(void)
 
 //	CURRENT.Expect = 50;//for test
 	//Init Control Parameters
-	IGBT.State 			= 0;
+	IGBT.State 			= -1;	//-1 means first run
 	IGBT.Turn 			= 0;
 	IGBT.Count 			= 0;
 	SPEED.Expect 		= SPEED_Expect;
@@ -63,12 +63,12 @@ void Init_SRD(void)
 	printf("Starting!\n");
 
 	SS_DN;					//L is enable
-	FAN_DN;					//L is enable
+//	FAN_DN;					//L is enable
 
 	DELAY_US(1000000L);
 	My_Init_ADC();
 	Error_Checking();
-//	DRV_DN;					//L is enable
+	DRV_DN;					//L is enable (note!!!!)
 	My_Init_Cputimer();
 }
 
@@ -88,35 +88,36 @@ void IGBT_Control(void)
 {
 	IGBT.State_1 = IGBT.State;
 
-	if(IGBT.Count)
+	if(IGBT.State == -1)	//first run
 	{
 		switch(NOW_state)
 		{
-			case 1:
-			case 2:		IGBT.State = 0;break;
-			case 3:
-			case 4:		IGBT.State = 1;break;
-			case 5:
-			case 0:		IGBT.State = 2;break;
-			default:	DRV_UP;
+		case 1:	IGBT.State = 0; IGBT.Count = 0;	break;
+		case 2:	IGBT.State = 0; IGBT.Count = 1;	break;
+		case 3:	IGBT.State = 1; IGBT.Count = 0;	break;
+		case 4:	IGBT.State = 1; IGBT.Count = 1;	break;
+		case 5:	IGBT.State = 2; IGBT.Count = 0;	break;
+		case 0:	IGBT.State = 2; IGBT.Count = 1;	break;
+		default:IGBT.State = -2; //error flag
 		}
-		if(IGBT.State == 2 && SRM_SPEED >= 0)	IGBT.Count = 0;
-		else if(IGBT.State == 0 && SRM_SPEED <= 0)	IGBT.Count = 0;
 	}
-	else
+	else if(SRM_Direction==1)	// no first run but state change
 	{
+		if(++IGBT.Count>1)
+		{
+			IGBT.Count = 0;
+			if(++IGBT.State>=6) IGBT.State -= 6;
+		}
 		switch(NOW_state)
 		{
-			case 1:
-			case 2:		IGBT.State = 3;break;
-			case 3:
-			case 4:		IGBT.State = 4;break;
-			case 5:
-			case 0:		IGBT.State = 5;break;
-			default:	DRV_UP;
+		case 1:
+		case 2:	if(IGBT.State!=0 && IGBT.State!=3) IGBT.State = -3; break; //error flag
+		case 3:
+		case 4:	if(IGBT.State!=1 && IGBT.State!=4) IGBT.State = -4; break; //error flag
+		case 5:
+		case 0:	if(IGBT.State!=2 && IGBT.State!=5) IGBT.State = -5; break; //error flag
+		default:IGBT.State = -2; //error flag
 		}
-		if(IGBT.State == 5 && SRM_SPEED >= 0)	IGBT.Count = 1;
-		else if(IGBT.State == 3 && SRM_SPEED <= 0)	IGBT.Count = 1;
 	}
 
 	if(IGBT.State_1 == IGBT.State)	IGBT.Turn = 0;

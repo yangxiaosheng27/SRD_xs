@@ -66,6 +66,7 @@ struct PWM_STRUCT{
 	int16 	Duty;
 };
 
+extern struct IGBT_STRUCT 		IGBT;
 extern struct SPEED_STRUCT 		SPEED;
 extern struct TORQUE_STRUCT 	TORQUE;
 extern struct CURRENT_STRUCT	CURRENT;
