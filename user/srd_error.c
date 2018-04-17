@@ -28,13 +28,13 @@ void Error_Checking(void)
 	if(Ref3V_ad<(Ref3V_offset-150)||Ref3V_ad>(Ref3V_offset+150))				ERROR |= 0x0080;
 	if((PieCtrlRegs.PIEIFR1.all | 0x40) == 0 && CpuTimer0Regs.TIM.all < 0X0100)	ERROR |= 0x0100;
 	if(SRM_ANGLE<0||SRM_ANGLE>=3600)											ERROR |= 0x0200;
-	if(SRM_SPEED<0)																ERROR |= 0x0400;
+//	if(SRM_SPEED<0)																ERROR |= 0x0400;
 	if(SRM_SPEED>MAX_SPEED||SRM_SPEED<-MAX_SPEED)								ERROR |= 0x0800;
 	if(EPwm1Regs.CMPA.half.CMPA*EPwm1Regs.CMPB||EPwm2Regs.CMPA.half.CMPA*EPwm2Regs.CMPB||EPwm3Regs.CMPA.half.CMPA*EPwm3Regs.CMPB)
 																				ERROR |= 0x1000;
-	if(SRM_Direction!=0 && SRM_Direction!=1)									ERROR |= 0x2000;
+//	if(SRM_Direction!=0 && SRM_Direction!=1)									ERROR |= 0x2000;
 	if(IGBT.State<-1 || IGBT.State>5)											ERROR |= 0x4000;
-//	if(HOT_state == 1)
+	if(HOT_state == 1)
 
 
 	if(ERROR)

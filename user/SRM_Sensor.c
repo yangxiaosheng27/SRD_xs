@@ -28,7 +28,7 @@ Uint16 Ref3V_offset	= 0;
 
 int16  SRM_Direction= 0;
 int16  SRM_SPEED	= 0;		// 1 menas 1r/min, -1 menas -1r/min, 150 means 150r/min
-int16  SRM_PHASE	= 0;		// 10 means 1deg, 1800 means 180deg
+int16  SRM_PHASE	= 0;		// 1000 means 1deg, 7500 means 7.5deg
 int16  SRM_ANGLE	= 0;		// 10 means 1deg, 1800 means 180deg
 int16  NOW_state	= -1;		// -1 means first run
 int16  LAST_state	= -1;		// -1 means first run
@@ -110,6 +110,9 @@ void Get_Position(void)
 		if(CpuTimer0.InterruptCount>30000)CpuTimer0.InterruptCount=30000;
 		if(SRM_Direction>0)	{SRM_SPEED = 62500/(int16)(CpuTimer0.InterruptCount);}
 		else				{SRM_SPEED = -62500/(int16)(CpuTimer0.InterruptCount);}
+
+		SRM_SPEED = SRM_SPEED*3/2;
+
 		if(SRM_Direction>0&&SRM_SPEED<0){SRM_ANGLE = -4;}			//set error flag
 		CpuTimer0.InterruptCount = 0;
 	}
@@ -119,10 +122,14 @@ void Get_Position(void)
 	}
 
 	//filtering the SRM_SPEED
-	static int16 SRM_SPEED_last = 0;
-	SRM_SPEED = SRM_SPEED/2 + SRM_SPEED_last/2;
-	SRM_SPEED_last = SRM_SPEED;
-
+	static int16 SRM_SPEED_1 = 0/*,SRM_SPEED_2 = 0,SRM_SPEED_3 = 0,SRM_SPEED_4 = 0*/;
+	SRM_SPEED = (SRM_SPEED+SRM_SPEED_1)/2;
+	SRM_SPEED_1 = SRM_SPEED;
+/*	SRM_SPEED = (5*SRM_SPEED+3*SRM_SPEED_1+1*SRM_SPEED_2+0*SRM_SPEED_3+0*SRM_SPEED_4)/9;
+	SRM_SPEED_4 = SRM_SPEED_3;
+	SRM_SPEED_3 = SRM_SPEED_2;
+	SRM_SPEED_2 = SRM_SPEED_1;
+	SRM_SPEED_1 = SRM_SPEED;*/
 
 	//calculate the Estimated_position
 	if(SRM_Direction)
@@ -132,11 +139,11 @@ void Get_Position(void)
 	else
 	{
 		if(SRM_SPEED>0)
-			SRM_PHASE = SRM_SPEED*3*CpuTimer0.InterruptCount/50000;		// for Estimated_position, 10 means 1deg; for SRM_SPEED, 20 menas 1r/min.
+			SRM_PHASE = SRM_SPEED*3*CpuTimer0.InterruptCount/50;		// for Estimated_position, 10 means 1deg; for SRM_SPEED, 20 menas 1r/min.
 		else
-			SRM_PHASE = -(-SRM_SPEED)*3*CpuTimer0.InterruptCount/50000;	// there are some problem in the sign of data type
+			SRM_PHASE = -(-SRM_SPEED)*3*CpuTimer0.InterruptCount/50;	// there are some problem in the sign of data type
 
-		if		(SRM_PHASE > 75)		SRM_PHASE = 75;
-		else if	(SRM_PHASE < -75)		SRM_PHASE = -75;
+		if		(SRM_PHASE > 7500)		SRM_PHASE = 7500;
+		else if	(SRM_PHASE < -7500)		SRM_PHASE = -7500;
 	}
 }

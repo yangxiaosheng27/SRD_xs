@@ -17,7 +17,7 @@ extern void Get_AD_Offset(void);
 extern void My_Init_ADC(void);
 extern void My_Init_Cputimer(void);
 extern void My_Init_GPIO(void);
-extern void My_Init_PWM();
+extern void My_Init_PWM(void);
 
 extern void Error_Checking(void);
 

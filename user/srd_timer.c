@@ -53,21 +53,21 @@ __interrupt void cpu_timer1_isr(void)
 }
 
 
-#pragma DATA_SECTION(Ierror_Data,"SampData1");
-volatile int16 Ierror_Data[2000]={0};
-#pragma DATA_SECTION(IU_Data,"SampData2");
-volatile int16 IU_Data[2000]={0};
-#pragma DATA_SECTION(Speed_Data,"SampData3");
-volatile int16 Speed_Data[2000]={0};
+#pragma DATA_SECTION(SampData1,"SampData1");
+volatile int16 SampData1[2000]={0};
+#pragma DATA_SECTION(SampData2,"SampData2");
+volatile int16 SampData2[2000]={0};
+#pragma DATA_SECTION(SampData3,"SampData3");
+volatile int16 SampData3[2000]={0};
 void Sample1()
 {
 	static int16 Samp_count=0;
 	if(Samp_count<=2000)
 	{
 		Samp_count++;
-		Ierror_Data[Samp_count] = CURRENT.Error;
+		SampData1[Samp_count] = CURRENT.Error;
 	}
-	else Samp_count = 0;
+//	else Samp_count = 0;
 }
 void Sample2()
 {
@@ -75,9 +75,9 @@ void Sample2()
 	if(Samp_count<=2000)
 	{
 		Samp_count++;
-		IU_Data[Samp_count] = IU_ad;
+		SampData2[Samp_count] = PWM.Duty;
 	}
-	else Samp_count = 0;
+//	else Samp_count = 0;
 }
 void Sample3()
 {
@@ -85,9 +85,9 @@ void Sample3()
 	if(Samp_count<=2000)
 	{
 		Samp_count++;
-		Speed_Data[Samp_count] = SRM_PHASE;
+		SampData3[Samp_count] = CURRENT.Integral;
 	}
-	else Samp_count = 0;
+//	else Samp_count = 0;
 }
 
 

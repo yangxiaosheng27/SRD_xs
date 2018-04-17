@@ -15,12 +15,12 @@ void TORQUE_Control(void);
 void CURRENT_Control(void);
 void PWM_Control(void);
 
-#define SPEED_Expect 	800		// 1000 means 1000	r/min
+#define SPEED_Expect 	900		// 1000 means 1000	r/min
 #define SPEED_MAX		1500		// 1000 means 1000	r/min
-#define SPEED_Kp 		2
+#define SPEED_Kp 		3
 #define SPEED_Kd 		0
 #define TORQUE_MAX 		2000		// 1000 means 1.000 N*m
-#define CURRENT_MAX		80			// 100 	means 6 	A
+#define CURRENT_MAX		100			// 100 	means 6 	A
 #define CURRENT_Kp		50
 #define CURRENT_Ki		1
 #define PWM_Duty_MAX	1000		// 1000	means 100%
@@ -63,7 +63,7 @@ void Init_SRD(void)
 	printf("Starting!\n");
 
 	SS_DN;					//L is enable
-//	FAN_DN;					//L is enable
+	FAN_DN;					//L is enable
 
 	DELAY_US(1000000L);
 	My_Init_ADC();
@@ -129,6 +129,9 @@ void SPEED_Control(void)
 	SPEED.Error = SPEED.Expect - SRM_SPEED;
 	TORQUE.Expect = SPEED.Kp * SPEED.Error;
 
+	TORQUE.Expect = 1000;  	//test
+	IGBT.State = 0;			//test
+
 	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX;
 }
 
@@ -153,13 +156,22 @@ void CURRENT_Control(void)		// CURRENT:0-100 means 0-6A, PWM_Duty:0-1000 means 0
 		default :	DRV_UP;
 	}
 
-	CURRENT.Error_1 = CURRENT.Error;
 	CURRENT.Error = CURRENT.Expect - CURRENT.Sample;
+
 	if(IGBT.Turn)
 		CURRENT.Integral = 0;
-	else if(PWM.Duty!=0 && PWM.Duty!=PWM.MAX)
-		CURRENT.Integral = CURRENT.Integral + CURRENT.Error_1;
-	PWM.Duty = CURRENT.Kp * CURRENT.Error + CURRENT.Ki * CURRENT.Integral / 100;
+	else
+		CURRENT.Integral = CURRENT.Integral + CURRENT.Error;
+
+	if(CURRENT.Error>10 || CURRENT.Error<-10)
+	{
+		CURRENT.Kp = 100;
+		CURRENT.Integral = 0;
+	}
+	else
+		CURRENT.Kp = 100;
+
+	PWM.Duty = CURRENT.Kp * CURRENT.Error + CURRENT.Ki * CURRENT.Integral;
 
 	if(PWM.Duty<0) PWM.Duty = 0;
 	else if(PWM.Duty>PWM.MAX) PWM.Duty = PWM.MAX;
