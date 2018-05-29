@@ -2,20 +2,20 @@
  * 	FileName:	srd_timer.c
  * 	Project:	SRD_xs
  *
- *  Created on: 2018/1/16
+ *  Created on: 2018/3/26
  *  Author: 	yangxiaosheng
  */
-#include "DSP28x_Project.h"     			// Device Headerfile and Examples Include File
 #include "SRD_Project.h"        			// User's Funtions
 
+void My_Init_Cputimer();
+void Sample1();
+void Sample2();
+void Sample3();
+void Test_SRD();
 __interrupt void cpu_timer0_isr(void);		// Prototype statements for functions found within this file.
 __interrupt void cpu_timer1_isr(void);		// Prototype statements for functions found within this file.
 
-int16 done=0;
-int16 data[1000]={0};
-//int16 data1[3000]={0};
-
-void my_init_cputimer()
+void My_Init_Cputimer()
 {
    EALLOW;  								// This is needed to write to EALLOW protected registers
    PieVectTable.TINT0 = &cpu_timer0_isr;
@@ -23,7 +23,7 @@ void my_init_cputimer()
    EDIS;    								// This is needed to disable write to EALLOW protected registers
    InitCpuTimers();   						// For this example, only initialize the Cpu Timers
    ConfigCpuTimer(&CpuTimer0, 90, 20);		// Configure CPU-Timer0, 90 is CPUFreq, 20 is uSeconds
-   ConfigCpuTimer(&CpuTimer1, 90, 1000);	// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
+   ConfigCpuTimer(&CpuTimer1, 90, 50);		// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
    IER |= M_INT1;							// Enable CPU int1 which is connected to CPU-Timer 0
    IER |= M_INT13;							// Enable CPU int13 which is connected to CPU-Timer 1
    PieCtrlRegs.PIEIER1.bit.INTx7 = 1;		// Enable TINT0 in the PIE: Group 1 interrupt 7
@@ -38,32 +38,73 @@ __interrupt void cpu_timer0_isr(void)
 	while (AdcRegs.ADCINTFLG.bit.ADCINT1 == 0){}		//Wait for ADCINT1
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;   			//Must clear ADCINT1 flag since INT1CONT = 0
 
-	get_state();
-	get_position();
-	phase_control();
-	pid_control();
-	hysteresis_control();
+	Control_SRD();
+	Sample1();
+	Sample2();
+	Sample3();
 
-
-	// checking
-	error_checking();
-	output_control();
 	// Acknowledge this interrupt to receive more interrupts from group 1
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
 }
 
-
 __interrupt void cpu_timer1_isr(void)
 {
-   if(done==0&&FIRST_RUN==0)
-   {
-	   CpuTimer1.InterruptCount++;
-	   data[CpuTimer1.InterruptCount] 	= I_abs;
-//	   data1[CpuTimer1.InterruptCount] 	= SRM_STATE;
-   }
-   if(CpuTimer1.InterruptCount>=5000)done=1;
-
+	CpuTimer1.InterruptCount++;
+//	Sample1();
+//	Sample2();
+//	Sample3();
 }
+
+#define Data_Length 3000
+#pragma DATA_SECTION(SampData1,"SampData1");
+volatile int16 SampData1[Data_Length]={0};
+#pragma DATA_SECTION(SampData2,"SampData2");
+volatile int16 SampData2[Data_Length]={0};
+#pragma DATA_SECTION(SampData3,"SampData3");
+volatile int16 SampData3[Data_Length]={0};
+void Sample1()
+{
+	static int16 Samp_count=0;
+	if(Samp_count<=Data_Length)
+	{
+		Samp_count++;
+		SampData1[Samp_count] = SRM_PHASE;
+	}
+	else Samp_count = 0;
+}
+void Sample2()
+{
+	static int16 Samp_count=0;
+	if(Samp_count<=Data_Length)
+	{
+		Samp_count++;
+		SampData2[Samp_count] = TORQUE_AB.Expect;
+	}
+	else Samp_count = 0;
+}
+void Sample3()
+{
+	static int16 Samp_count=0;
+	if(Samp_count<=Data_Length)
+	{
+		Samp_count++;
+		SampData3[Samp_count] = TORQUE_AB.Sample;
+	}
+	else Samp_count = 0;
+}
+
+void Test_SRD()
+{
+	PWM.NOW		=	700;
+
+	EPwm1Regs.CMPA.half.CMPA = PWM.NOW;
+	EPwm1Regs.CMPB			 = 0;
+	EPwm2Regs.CMPA.half.CMPA = 0;
+	EPwm2Regs.CMPB			 = PWM.NOW;
+	EPwm3Regs.CMPA.half.CMPA = 0;
+	EPwm3Regs.CMPB			 = 0;
+}
+
 //===========================================================================
 // No more.
 //===========================================================================

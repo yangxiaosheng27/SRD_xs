@@ -41,7 +41,7 @@ void InitCpuTimers(void)
 	// Reload all counter register with period value:
 	CpuTimer0Regs.TCR.bit.TRB = 1;
 	// Reset interrupt counters:
-	//CpuTimer0.InterruptCount = 0;
+	CpuTimer0.InterruptCount = 0;
 
 
 // Initialize address pointers to respective timer registers:
@@ -62,8 +62,8 @@ void InitCpuTimers(void)
 	CpuTimer1Regs.TCR.bit.TRB = 1;
 	CpuTimer2Regs.TCR.bit.TRB = 1;
 	// Reset interrupt counters:
-	//CpuTimer1.InterruptCount = 0;
-	//CpuTimer2.InterruptCount = 0;
+	CpuTimer1.InterruptCount = 0;
+	CpuTimer2.InterruptCount = 0;
 
 }
 
