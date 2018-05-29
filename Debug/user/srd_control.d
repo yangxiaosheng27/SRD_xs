@@ -37,6 +37,7 @@ user/SRD_Control.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h
 user/SRD_Control.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h
 user/SRD_Control.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/linkage.h
 user/SRD_Control.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdarg.h
+user/SRD_Control.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h
 
 ../user/SRD_Control.c: 
 ../user/SRD_Project.h: 
@@ -75,3 +76,4 @@ D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h:
 D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h: 
 D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/linkage.h: 
 D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdarg.h: 
+D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h: 
