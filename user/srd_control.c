@@ -9,85 +9,66 @@
 #include <stdio.h>
 
 void Init_SRD(void);
-void LOGIC_Control(void);
-void SPEED_Control(void);
-void TORQUE_Calculate(void);
-void TORQUE_Distribution(void);
-void TORQUE_Control(void);
 void IGBT_Control(void);
+void SPEED_Control(void);
+void TORQUE_Control(void);
+void CURRENT_Control(void);
+void PWM_Control(void);
 
-#define SPEED_Expect 		1000		// 1000 means 1000	r/min
-#define SPEED_MAX			1500		// 1000 means 1000	r/min
-#define SPEED_Kp 			3
-#define SPEED_Kd 			0
-#define TORQUE_MAX 			2000		// 1000 means 1.000 N*m
-#define TORQUE_Kp			100
-#define TORQUE_Ki			3
-#define TORQUE_Hysteresis	200			// used in Theta_ov
-#define PWM_MAX				1000		// 1000	means 100% duty
-#define Theta_ov			20			// 20	means 2 deg
+#define SPEED_Expect 	900		// 1000 means 1000	r/min
+#define SPEED_MAX		1500		// 1000 means 1000	r/min
+#define SPEED_Kp 		3
+#define SPEED_Kd 		0
+#define TORQUE_MAX 		2000		// 1000 means 1.000 N*m
+#define CURRENT_MAX		100			// 100 	means 6 	A
+#define CURRENT_Kp		50
+#define CURRENT_Ki		1
+#define PWM_Duty_MAX	1000		// 1000	means 100%
 
-struct LOGIC_STRUCT			LOGIC;
-struct SPEED_STRUCT 		SPEED;
-struct TORQUE_STRUCT 		TORQUE;
-struct TORQUE_STRUCT 		TORQUE_AB;
-struct TORQUE_STRUCT 		TORQUE_BC;
-struct TORQUE_STRUCT 		TORQUE_CA;
-struct PWM_STRUCT			PWM;
+struct IGBT_STRUCT		IGBT;
+struct SPEED_STRUCT 	SPEED;
+struct TORQUE_STRUCT 	TORQUE;
+struct CURRENT_STRUCT	CURRENT;
+struct PWM_STRUCT		PWM;
 
 void Init_SRD(void)
 {
 	My_Init_GPIO();
-	DRV_UP;					//H is Disaable
-	BR_UP;					//H is Disaable
-	SS_UP;					//H is Disaable
-	FAN_UP;					//H is Disaable
+	DRV_UP;					//H is disaable
+	BR_UP;					//H is disaable
+	SS_UP;					//H is disaable
+	FAN_UP;					//H is disaable
 	My_Init_PWM();
 
+//	CURRENT.Expect = 50;//for test
 	//Init Control Parameters
-	LOGIC.Turn 			= 0;
-	LOGIC.State 		= -1; //first run
-	LOGIC.Count 		= 0;
-	PWM.MAX				= PWM_MAX;
-	PWM.COM				= 0;
+	IGBT.State 			= -1;	//-1 means first run
+	IGBT.Turn 			= 0;
+	IGBT.Count 			= 0;
 	SPEED.Expect 		= SPEED_Expect;
 	SPEED.MAX 			= SPEED_MAX;
 	SPEED.Kp 			= SPEED_Kp;
 	SPEED.Kd 			= SPEED_Kd;
 	SPEED.Error			= 0;
-	SPEED.Count			= 0;
 	TORQUE.MAX 			= TORQUE_MAX;
-	TORQUE.Hysteresis	= TORQUE_Hysteresis;
-	TORQUE_AB.MAX 		= TORQUE_MAX;
-	TORQUE_AB.Kp		= TORQUE_Kp;
-	TORQUE_AB.Ki		= TORQUE_Ki;
-	TORQUE_AB.Error		= 0;
-	TORQUE_AB.Integral	= 0;
-	TORQUE_AB.Integral_Max	= PWM_MAX / 2 * 1000L * TORQUE_Ki;
-	TORQUE_BC.MAX 		= TORQUE_MAX;
-	TORQUE_BC.Kp		= TORQUE_Kp;
-	TORQUE_BC.Ki		= TORQUE_Ki;
-	TORQUE_BC.Error		= 0;
-	TORQUE_BC.Integral	= 0;
-	TORQUE_BC.Integral_Max	= PWM_MAX / TORQUE_Ki;
-	TORQUE_CA.MAX 		= TORQUE_MAX;
-	TORQUE_CA.Kp		= TORQUE_Kp;
-	TORQUE_CA.Ki		= TORQUE_Ki;
-	TORQUE_CA.Error		= 0;
-	TORQUE_CA.Integral	= 0;
-	TORQUE_CA.Integral_Max	= PWM_MAX / TORQUE_Ki;
+	CURRENT.MAX 		= CURRENT_MAX;
+	CURRENT.Kp			= CURRENT_Kp;
+	CURRENT.Ki	 		= CURRENT_Ki;
+	CURRENT.Error		= 0;
+	CURRENT.Integral	= 0;
+	PWM.MAX				= PWM_Duty_MAX;
 
-	printf("Hi,YangXiaoSheng!\nPress \"Enter\" to run the SRM.\n");
+	printf("Hi,YangXiaoSheng!\nPlease press enter to start!\n");
 	getchar();
-	printf("SRM is Runing.\n");
+	printf("Starting!\n");
 
-	SS_DN;					//L is Enable
-	FAN_DN;					//L is Enable
+	SS_DN;					//L is enable
+	FAN_DN;					//L is enable
 
 	DELAY_US(1000000L);
 	My_Init_ADC();
 	Error_Checking();
-//	DRV_DN;					//DRV_DN will enable the control signal! Be careful!
+	DRV_DN;					//L is enable (note!!!!)
 	My_Init_Cputimer();
 }
 
@@ -95,435 +76,154 @@ void Control_SRD(void)
 {
 	Get_State();
 	Get_Position();
-	LOGIC_Control();
-	SPEED.Count++;
-	if(SPEED.Count >= 5)
-	{
-		SPEED_Control();
-		SPEED.Count = 0;
-	}
-	TORQUE_Calculate();
-	TORQUE_Distribution();
-	TORQUE_Control();
-	Error_Checking();
 	IGBT_Control();
+	SPEED_Control();
+	TORQUE_Control();
+	CURRENT_Control();
+	Error_Checking();
+	PWM_Control();
 }
 
-void LOGIC_Control(void)
+void IGBT_Control(void)
 {
-	LOGIC.State_1 = LOGIC.State;
+	IGBT.State_1 = IGBT.State;
 
-	if(SRM_FIRST_RUN)	//first run
+	if(IGBT.State == -1)	//first run
 	{
 		switch(NOW_state)
 		{
-		case 1:	LOGIC.State = 0; LOGIC.Count = 0;	break;
-		case 2:	LOGIC.State = 0; LOGIC.Count = 1;	break;
-		case 3:	LOGIC.State = 1; LOGIC.Count = 0;	break;
-		case 4:	LOGIC.State = 1; LOGIC.Count = 1;	break;
-		case 5:	LOGIC.State = 2; LOGIC.Count = 0;	break;
-		case 0:	LOGIC.State = 2; LOGIC.Count = 1;	break;
-		default:DRV_UP;LOGIC.State = -2; //error flag
+		case 1:	IGBT.State = 0; IGBT.Count = 0;	break;
+		case 2:	IGBT.State = 0; IGBT.Count = 1;	break;
+		case 3:	IGBT.State = 1; IGBT.Count = 0;	break;
+		case 4:	IGBT.State = 1; IGBT.Count = 1;	break;
+		case 5:	IGBT.State = 2; IGBT.Count = 0;	break;
+		case 0:	IGBT.State = 2; IGBT.Count = 1;	break;
+		default:IGBT.State = -2; //error flag
 		}
 	}
-	else if(SRM_Direction>0)	// no first run but state change
+	else if(SRM_Direction==1)	// no first run but state change
 	{
-		if(++LOGIC.Count>1)
+		if(++IGBT.Count>1)
 		{
-			LOGIC.Count = 0;
-			if(++LOGIC.State>=6) LOGIC.State -= 6;
+			IGBT.Count = 0;
+			if(++IGBT.State>=6) IGBT.State -= 6;
 		}
 		switch(NOW_state)
 		{
 		case 1:
-		case 2:	if(LOGIC.State!=0 && LOGIC.State!=3) LOGIC.State = -3; break; //error flag
+		case 2:	if(IGBT.State!=0 && IGBT.State!=3) IGBT.State = -3; break; //error flag
 		case 3:
-		case 4:	if(LOGIC.State!=1 && LOGIC.State!=4) LOGIC.State = -4; break; //error flag
+		case 4:	if(IGBT.State!=1 && IGBT.State!=4) IGBT.State = -4; break; //error flag
 		case 5:
-		case 0:	if(LOGIC.State!=2 && LOGIC.State!=5) LOGIC.State = -5; break; //error flag
-		default:DRV_UP;LOGIC.State = -2; //error flag
+		case 0:	if(IGBT.State!=2 && IGBT.State!=5) IGBT.State = -5; break; //error flag
+		default:IGBT.State = -2; //error flag
 		}
 	}
-	else if(SRM_Direction<0)
-	{
-			if(--LOGIC.Count<0)
-			{
-				LOGIC.Count = 1;
-				if(--LOGIC.State<0) LOGIC.State += 6;
-			}
-	}
 
-	if(LOGIC.State_1 == LOGIC.State)	LOGIC.Turn = 0;
-	else								LOGIC.Turn = 1;
+	if(IGBT.State_1 == IGBT.State)	IGBT.Turn = 0;
+	else							IGBT.Turn = 1;
 }
 
 void SPEED_Control(void)
 {
 	SPEED.Error = SPEED.Expect - SRM_SPEED;
 	TORQUE.Expect = SPEED.Kp * SPEED.Error;
-	if(SRM_FIRST_RUN)	TORQUE.Expect = TORQUE.MAX ;
-	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX/2;
-}
 
-int32 TORQUE_Model[6][30]={
-		{   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{  60,   65,   90,   80,   80,  100,  100,   80,  120,  150,  120,  100,  110,   90,   40,   20,   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{ 260,  300,  365,  365,  370,  390,  380,  385,  410,  510,  410,  410,  430,  440,  210,   60,   40,   20,   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{ 620,  730,  830,  850,  870,  880,  880,  890,  890,  980,  910,  920,  975,  830,  420,  170,  130,   70,   50,   20,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{1210, 1370, 1470, 1500, 1520, 1540, 1530, 1560, 1550, 1580, 1530, 1560, 1660, 1690,  670,  340,  240,  160,  120,   50,   20,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{1810, 1990, 2200, 2280, 2360, 2370, 2350, 2370, 2330, 2350, 2320, 2280, 2340, 2470, 1980,  900,  500,  280,  220,  110,   40,    0,    0,    0,    0,    0,    0,    0,    0,    0}
-};
-#define GET_TORQUE ((TORQUE_Model[I_index+1][theta_index+1]*theta_ratio + TORQUE_Model[I_index+1][theta_index]*(100-theta_ratio))*I_ratio + (TORQUE_Model[I_index][theta_index+1]*theta_ratio + TORQUE_Model[I_index][theta_index]*(100-theta_ratio))*(100-I_ratio))/10000
-void TORQUE_Calculate(void)
-{
-	int32 I_index,I_ratio,theta_index,theta_ratio;
-	int32 Ia_abs = Ia>0?Ia:(-Ia);
-	int32 Ib_abs = Ib>0?Ib:(-Ib);
-	int32 Ic_abs = Ic>0?Ic:(-Ic);
-	Ib_abs = Ib>0?Ib:(-Ib);
-	Ic_abs = Ic>0?Ic:(-Ic);
-	//限制电流!!!!!!!!!!!!!!!
-	switch(LOGIC.State)
-	{
-	case  0:
-	case  3:	theta_index 		= SRM_PHASE/10;
-				theta_ratio 		= SRM_PHASE%10*10;			// 1 means 1%
-				I_index 			= Ia_abs/100;
-				I_ratio 			= Ia_abs%100;			// 1 means 1%
-				TORQUE_AB.Sample 	= GET_TORQUE;
-				theta_index			= SRM_PHASE/10 + 15;
-				I_index 			= Ic_abs/100;
-				I_ratio 			= Ic_abs%100;			// 1 means 1%
-				TORQUE_BC.Sample 	= GET_TORQUE;
-				TORQUE_CA.Sample 	= 0;
-				break;
-	case  1:
-	case  4:	theta_index 		= SRM_PHASE/10 + 15;
-				theta_ratio 		= SRM_PHASE%10*10;			// 1 means 1%
-				I_index 			= Ib_abs/100;
-				I_ratio 			= Ib_abs%100;			// 1 means 1%
-				TORQUE_AB.Sample 	= GET_TORQUE;
-				TORQUE_BC.Sample 	= 0;
-				theta_index 		= SRM_PHASE/10;
-				I_index 			= Ic_abs/100;
-				I_ratio 			= Ic_abs%100;			// 1 means 1%
-				TORQUE_CA.Sample 	= GET_TORQUE;
-				break;
-	case  2:
-	case  5:	TORQUE_AB.Sample 	= 0;
-				theta_index 		= SRM_PHASE/10;
-				theta_ratio 		= SRM_PHASE%10*10;			// 1 means 1%
-				I_index 			= Ib_abs/100;
-				I_ratio 			= Ib_abs%100;			// 1 means 1%
-				TORQUE_BC.Sample 	= GET_TORQUE;
-				theta_index 		= SRM_PHASE/10 + 15;
-				I_index 			= Ia_abs/100;
-				I_ratio 			= Ia_abs%100;			// 1 means 1%
-				TORQUE_CA.Sample 	= GET_TORQUE;
-				break;
-	default:	DRV_UP;
-	}
-}
+	TORQUE.Expect = 1000;  	//test
+	IGBT.State = 0;			//test
 
-void TORQUE_Distribution(void)
-{
-	if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-	{
-		TORQUE.NEXT = TORQUE.Expect*SRM_PHASE/Theta_ov;
-		TORQUE.LAST = TORQUE.Expect-TORQUE.NEXT;
-		switch(LOGIC.State)
-		{
-		case  0:
-		case  3:	TORQUE_AB.Expect = TORQUE.NEXT;
-					TORQUE_BC.Expect = TORQUE.LAST;
-					TORQUE_CA.Expect = 0;
-					break;
-		case  1:
-		case  4:	TORQUE_AB.Expect = TORQUE.LAST;
-					TORQUE_BC.Expect = 0;
-					TORQUE_CA.Expect = TORQUE.NEXT;
-					break;
-		case  2:
-		case  5:	TORQUE_AB.Expect = 0;
-					TORQUE_BC.Expect = TORQUE.NEXT;
-					TORQUE_CA.Expect = TORQUE.LAST;
-					break;
-		default:	DRV_UP;
-		}
-	}
-	else
-	{
-		switch(LOGIC.State)
-		{
-		case  0:
-		case  3:	TORQUE_AB.Expect = TORQUE.Expect;
-					TORQUE_BC.Expect = 0;
-					TORQUE_CA.Expect = 0;
-					break;
-		case  1:
-		case  4:	TORQUE_AB.Expect = 0;
-					TORQUE_BC.Expect = 0;
-					TORQUE_CA.Expect = TORQUE.Expect;
-					break;
-		case  2:
-		case  5:	TORQUE_AB.Expect = 0;
-					TORQUE_BC.Expect = TORQUE.Expect;
-					TORQUE_CA.Expect = 0;
-					break;
-		default:	DRV_UP;
-		}
-	}
+	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX;
 }
 
 void TORQUE_Control(void)
 {
-	if(LOGIC.Turn)
-	{
-		TORQUE_AB.Integral = TORQUE_BC.Integral = TORQUE_CA.Integral = 0;
-	}
-	switch(LOGIC.State)
-	{
-	case  0:
-	case  3:if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-			{
-				TORQUE_AB.Error = TORQUE_AB.Expect - TORQUE_AB.Sample;
-				TORQUE_AB.Integral += TORQUE_AB.Error;
-				if(TORQUE_AB.Integral > TORQUE_AB.Integral_Max)	TORQUE_AB.Integral = TORQUE_AB.Integral_Max;
-				else if(TORQUE_AB.Integral <0)	TORQUE_AB.Integral = 0;
-				PWM.NEXT = TORQUE_AB.Kp * TORQUE_AB.Error/ 300 + TORQUE_AB.Ki * TORQUE_AB.Integral / 1000;
-				if(PWM.NEXT > PWM.MAX)	PWM.NEXT = PWM.MAX;
-				else if(PWM.NEXT <0)	PWM.NEXT = 0;
+	CURRENT.Expect = TORQUE.Expect / 20;
 
-				TORQUE_BC.Error = TORQUE_BC.Expect - TORQUE_BC.Sample;
-				TORQUE_BC.Integral += TORQUE_BC.Error;
-				if(TORQUE_BC.Integral > TORQUE_BC.Integral_Max)	TORQUE_BC.Integral = TORQUE_BC.Integral_Max;
-				else if(TORQUE_BC.Integral <0)	TORQUE_BC.Integral = 0;
-				PWM.LAST = TORQUE_BC.Kp * TORQUE_BC.Error/ 300 + TORQUE_BC.Ki * TORQUE_BC.Integral / 1000;
-				if(PWM.LAST > PWM.MAX)	PWM.LAST = PWM.MAX;
-				else if(PWM.LAST < 0)	PWM.LAST = 0;
-
-				if(TORQUE_BC.Error >= 0)PWM.COM = 1000;
-				else if(TORQUE_BC.Error < TORQUE.Hysteresis)PWM.COM = 0;
-			}
-			else
-			{
-				TORQUE_AB.Error = TORQUE_AB.Expect - TORQUE_AB.Sample;
-				TORQUE_AB.Integral += TORQUE_AB.Error;
-				if(TORQUE_AB.Integral > TORQUE_AB.Integral_Max)	TORQUE_AB.Integral = TORQUE_AB.Integral_Max;
-				else if(TORQUE_AB.Integral <0)	TORQUE_AB.Integral = 0;
-				if(TORQUE_AB.Integral > TORQUE_AB.Integral_Max)TORQUE_AB.Integral = TORQUE_AB.Integral_Max;
-				PWM.NOW = TORQUE_AB.Kp * TORQUE_AB.Error/ 300 + TORQUE_AB.Ki * TORQUE_AB.Integral / 1000;
-				if(PWM.NOW > PWM.MAX)	PWM.NOW = PWM.MAX;
-				else if(PWM.NOW < 0)	PWM.NOW = 0;
-			}
-			break;
-	case  1:
-	case  4:if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-			{
-				TORQUE_CA.Error = TORQUE_CA.Expect - TORQUE_CA.Sample;
-				TORQUE_CA.Integral += TORQUE_CA.Error;
-				if(TORQUE_CA.Integral > TORQUE_CA.Integral_Max)	TORQUE_CA.Integral = TORQUE_CA.Integral_Max;
-				else if(TORQUE_CA.Integral <0)	TORQUE_CA.Integral = 0;
-				PWM.NEXT = TORQUE_CA.Kp * TORQUE_CA.Error/ 300 + TORQUE_CA.Ki * TORQUE_CA.Integral / 1000;
-				if(PWM.NEXT > PWM.MAX)	PWM.NEXT = PWM.MAX;
-				else if(PWM.NEXT < 0)	PWM.NEXT = 0;
-
-				TORQUE_AB.Error = TORQUE_AB.Expect - TORQUE_AB.Sample;
-				TORQUE_AB.Integral += TORQUE_AB.Error;
-				if(TORQUE_AB.Integral > TORQUE_AB.Integral_Max)	TORQUE_AB.Integral = TORQUE_AB.Integral_Max;
-				else if(TORQUE_AB.Integral <0)	TORQUE_AB.Integral = 0;
-				PWM.LAST = TORQUE_AB.Kp * TORQUE_AB.Error/ 300 + TORQUE_AB.Ki * TORQUE_AB.Integral / 1000;
-				if(PWM.LAST > PWM.MAX)	PWM.LAST = PWM.MAX;
-				else if(PWM.LAST < 0)	PWM.LAST = 0;
-
-				if(TORQUE_AB.Error >= 0)PWM.COM = 1000;
-				else if(TORQUE_AB.Error < TORQUE.Hysteresis)PWM.COM = 0;
-			}
-			else
-			{
-				TORQUE_CA.Error = TORQUE_CA.Expect - TORQUE_CA.Sample;
-				TORQUE_CA.Integral += TORQUE_CA.Error;
-				if(TORQUE_CA.Integral > TORQUE_CA.Integral_Max)	TORQUE_CA.Integral = TORQUE_CA.Integral_Max;
-				else if(TORQUE_CA.Integral <0)	TORQUE_CA.Integral = 0;
-				if(TORQUE_CA.Integral > TORQUE_CA.Integral_Max)TORQUE_CA.Integral = TORQUE_CA.Integral_Max;
-				PWM.NOW = TORQUE_CA.Kp * TORQUE_CA.Error/ 300 + TORQUE_CA.Ki * TORQUE_CA.Integral / 1000;
-				if(PWM.NOW > PWM.MAX)	PWM.NOW = PWM.MAX;
-				else if(PWM.NOW < 0)	PWM.NOW = 0;
-			}
-			break;
-	case  2:
-	case  5:if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-			{
-				TORQUE_BC.Error = TORQUE_BC.Expect - TORQUE_BC.Sample;
-				TORQUE_BC.Integral += TORQUE_BC.Error;
-				if(TORQUE_BC.Integral > TORQUE_BC.Integral_Max)	TORQUE_BC.Integral = TORQUE_BC.Integral_Max;
-				else if(TORQUE_BC.Integral <0)	TORQUE_BC.Integral = 0;
-				PWM.NEXT = TORQUE_BC.Kp * TORQUE_BC.Error/ 300 + TORQUE_BC.Ki * TORQUE_BC.Integral / 1000;
-				if(PWM.NEXT > PWM.MAX)	PWM.NEXT = PWM.MAX;
-				else if (PWM.NEXT <0)	PWM.NEXT = 0;
-
-				TORQUE_CA.Error = TORQUE_CA.Expect - TORQUE_CA.Sample;
-				TORQUE_CA.Integral += TORQUE_CA.Error;
-				if(TORQUE_CA.Integral > TORQUE_CA.Integral_Max)	TORQUE_CA.Integral = TORQUE_CA.Integral_Max;
-				else if(TORQUE_CA.Integral <0)	TORQUE_CA.Integral = 0;
-				PWM.LAST = TORQUE_CA.Kp * TORQUE_CA.Error/ 300 + TORQUE_CA.Ki * TORQUE_CA.Integral / 1000;
-				if(PWM.LAST > PWM.MAX)	PWM.LAST = PWM.MAX;
-				else if(PWM.LAST < 0)	PWM.LAST = 0;
-
-				if(TORQUE_CA.Error >= 0)PWM.COM = 1000;
-				else if(TORQUE_CA.Error < TORQUE.Hysteresis)PWM.COM = 0;
-			}
-			else
-			{
-				TORQUE_BC.Error = TORQUE_BC.Expect - TORQUE_BC.Sample;
-				TORQUE_BC.Integral += TORQUE_BC.Error;
-				if(TORQUE_BC.Integral > TORQUE_BC.Integral_Max)	TORQUE_BC.Integral = TORQUE_BC.Integral_Max;
-				else if(TORQUE_BC.Integral <0)	TORQUE_BC.Integral = 0;
-				if(TORQUE_BC.Integral > TORQUE_BC.Integral_Max)TORQUE_BC.Integral = TORQUE_BC.Integral_Max;
-				PWM.NOW = TORQUE_BC.Kp * TORQUE_BC.Error/ 300 + TORQUE_BC.Ki * TORQUE_BC.Integral / 1000;
-				if(PWM.NOW > PWM.MAX)	PWM.NOW = PWM.MAX;
-				else if(PWM.NOW < 0)	PWM.NOW = 0;
-			}
-			break;
-	default:	DRV_UP;
-	}
-
+	if(CURRENT.Expect > CURRENT.MAX) CURRENT.Expect= CURRENT.MAX;
+	else if(CURRENT.Expect <0) CURRENT.Expect= 0;
 }
 
-Uint16 alpha[6];
-void IGBT_Control(void)
+void CURRENT_Control(void)		// CURRENT:0-100 means 0-6A, PWM_Duty:0-1000 means 0-100%
 {
-	switch(LOGIC.State)
+	switch(IGBT.State)
 	{
-		case 0:	if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-				{
-					alpha[0] 	= (Uint16)PWM.NEXT;
-					alpha[1]	= 0;
-					alpha[2] 	= 0;
-					alpha[3]	= (Uint16)PWM.COM;
-					alpha[4] 	= (Uint16)PWM.LAST;
-					alpha[5]	= 0;
-				}
-				else
-				{
-					alpha[0] 	= (Uint16)PWM.NOW;
-					alpha[1]	= 0;
-					alpha[2] 	= 0;
-					alpha[3]	= (Uint16)PWM.NOW;
-					alpha[4] 	= 0;
-					alpha[5]	= 0;
-				}
-				break;
-	case 1:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-				{
-					alpha[0] 	= (Uint16)PWM.COM;
-					alpha[1]	= 0;
-					alpha[2] 	= 0;
-					alpha[3]	= (Uint16)PWM.LAST;
-					alpha[4] 	= 0;
-					alpha[5]	= (Uint16)PWM.NEXT;
-				}
-				else
-				{
-					alpha[0] 	= (Uint16)PWM.NOW;
-					alpha[1]	= 0;
-					alpha[2] 	= 0;
-					alpha[3]	= 0;
-					alpha[4] 	= 0;
-					alpha[5]	= (Uint16)PWM.NOW;
-				}
-				break;
-	case 2:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-				{
-					alpha[0] 	= (Uint16)PWM.LAST;
-					alpha[1]	= 0;
-					alpha[2] 	= (Uint16)PWM.NEXT;
-					alpha[3]	= 0;
-					alpha[4] 	= 0;
-					alpha[5]	= (Uint16)PWM.COM;
-				}
-				else
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= 0;
-					alpha[2] 	= (Uint16)PWM.NOW;
-					alpha[3]	= 0;
-					alpha[4] 	= 0;
-					alpha[5]	= (Uint16)PWM.NOW;
-				}
-				break;
-	case 3:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= (Uint16)PWM.NEXT;
-					alpha[2] 	= (Uint16)PWM.COM;
-					alpha[3]	= 0;
-					alpha[4] 	= 0;
-					alpha[5]	= (Uint16)PWM.LAST;
-				}
-				else
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= (Uint16)PWM.NOW;
-					alpha[2] 	= (Uint16)PWM.NOW;
-					alpha[3]	 = 0;
-					alpha[4] 	= 0;
-					alpha[5]	= 0;
-				}
-				break;
-	case 4:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= (Uint16)PWM.COM;
-					alpha[2] 	= (Uint16)PWM.LAST;
-					alpha[3]	= 0;
-					alpha[4] 	= (Uint16)PWM.NEXT;
-					alpha[5]	= 0;
-				}
-				else
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= (Uint16)PWM.NOW;
-					alpha[2] 	= 0;
-					alpha[3]	= 0;
-					alpha[4] 	= (Uint16)PWM.NOW;
-					alpha[5]	= 0;
-				}
-				break;
-	case 5:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= (Uint16)PWM.LAST;
-					alpha[2] 	= 0;
-					alpha[3]	= (Uint16)PWM.NEXT;
-					alpha[4] 	= (Uint16)PWM.COM;
-					alpha[5]	= 0;
-				}
-				else
-				{
-					alpha[0] 	= 0;
-					alpha[1]	= 0;
-					alpha[2] 	= 0;
-					alpha[3]	= (Uint16)PWM.NOW;
-					alpha[4] 	= (Uint16)PWM.NOW;
-					alpha[5]	= 0;
-				}
-				break;
-	default :	DRV_UP;
+		case 0:
+		case 1:		CURRENT.Sample = (int16)(IU_ad - IU_offset); break;
+		case 2:
+		case 3:		CURRENT.Sample = (int16)(IV_ad - IV_offset); break;
+		case 4:
+		case 5:		CURRENT.Sample = (int16)(IU_offset +  IV_offset - IU_ad - IV_ad); break;
+		default :	DRV_UP;
 	}
-	if(alpha[0] && alpha[1] || alpha[2] && alpha[3] || alpha[4] && alpha[5])
+
+	CURRENT.Error = CURRENT.Expect - CURRENT.Sample;
+
+	if(IGBT.Turn)
+		CURRENT.Integral = 0;
+	else
+		CURRENT.Integral = CURRENT.Integral + CURRENT.Error;
+
+	if(CURRENT.Error>10 || CURRENT.Error<-10)
 	{
-		DRV_UP;
-		while(1);	// big error!
+		CURRENT.Kp = 100;
+		CURRENT.Integral = 0;
 	}
 	else
+		CURRENT.Kp = 100;
+
+	PWM.Duty = CURRENT.Kp * CURRENT.Error + CURRENT.Ki * CURRENT.Integral;
+
+	if(PWM.Duty<0) PWM.Duty = 0;
+	else if(PWM.Duty>PWM.MAX) PWM.Duty = PWM.MAX;
+}
+
+void PWM_Control(void)
+{
+	switch(IGBT.State)
 	{
-		EPwm1Regs.CMPA.half.CMPA = alpha[0];
-		EPwm1Regs.CMPB			 = alpha[1];
-		EPwm2Regs.CMPA.half.CMPA = alpha[2];
-		EPwm2Regs.CMPB			 = alpha[3];
-		EPwm3Regs.CMPA.half.CMPA = alpha[4];
-		EPwm3Regs.CMPB			 = alpha[5];
+		case 0:		EPwm1Regs.CMPA.half.CMPA = (Uint16)PWM.Duty;
+					EPwm1Regs.CMPB			 = 0;
+					EPwm2Regs.CMPA.half.CMPA = 0;
+					EPwm2Regs.CMPB			 = 1000;
+					EPwm3Regs.CMPA.half.CMPA = 0;
+					EPwm3Regs.CMPB			 = 0;
+					break;
+		case 1:		EPwm1Regs.CMPA.half.CMPA = (Uint16)PWM.Duty;
+					EPwm1Regs.CMPB			 = 0;
+					EPwm2Regs.CMPA.half.CMPA = 0;
+					EPwm2Regs.CMPB			 = 0;
+					EPwm3Regs.CMPA.half.CMPA = 0;
+					EPwm3Regs.CMPB			 = 1000;
+					break;
+		case 2:		EPwm1Regs.CMPA.half.CMPA = 0;
+					EPwm1Regs.CMPB			 = 0;
+					EPwm2Regs.CMPA.half.CMPA = (Uint16)PWM.Duty;
+					EPwm2Regs.CMPB			 = 0;
+					EPwm3Regs.CMPA.half.CMPA = 0;
+					EPwm3Regs.CMPB			 = 1000;
+					break;
+		case 3:		EPwm1Regs.CMPA.half.CMPA = 0;
+					EPwm1Regs.CMPB			 = 1000;
+					EPwm2Regs.CMPA.half.CMPA = (Uint16)PWM.Duty;
+					EPwm2Regs.CMPB			 = 0;
+					EPwm3Regs.CMPA.half.CMPA = 0;
+					EPwm3Regs.CMPB			 = 0;
+					break;
+		case 4:		EPwm1Regs.CMPA.half.CMPA = 0;
+					EPwm1Regs.CMPB			 = 1000;
+					EPwm2Regs.CMPA.half.CMPA = 0;
+					EPwm2Regs.CMPB			 = 0;
+					EPwm3Regs.CMPA.half.CMPA = (Uint16)PWM.Duty;
+					EPwm3Regs.CMPB			 = 0;
+					break;
+		case 5:		EPwm1Regs.CMPA.half.CMPA = 0;
+					EPwm1Regs.CMPB			 = 0;
+					EPwm2Regs.CMPA.half.CMPA = 0;
+					EPwm2Regs.CMPB			 = 1000;
+					EPwm3Regs.CMPA.half.CMPA = (Uint16)PWM.Duty;
+					EPwm3Regs.CMPB			 = 0;
+					break;
+		default :	DRV_UP;
 	}
 }
 
