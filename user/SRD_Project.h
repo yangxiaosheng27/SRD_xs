@@ -9,11 +9,11 @@
 #include "F2806x_Cla_typedefs.h"// F2806x CLA Type definitions
 #include "F2806x_Device.h"      // F2806x Headerfile Include File
 #include "F2806x_Examples.h"   	// F2806x Examples Include File
-#include <stdio.h>
 
 #ifndef USER_SRD_PROJECT_H_
 #define USER_SRD_PROJECT_H_
 
+extern void Get_AD_Offset(void);
 extern void My_Init_ADC(void);
 extern void My_Init_Cputimer(void);
 extern void My_Init_GPIO(void);
@@ -26,51 +26,51 @@ extern void Get_Position(void);
 
 extern void Init_SRD(void);
 extern void Control_SRD(void);
+extern void IGBT_Control(void);
+extern void SPEED_Control(void);
+extern void TORQUE_Control(void);
+extern void CURRENT_Control(void);
+extern void PWM_Control(void);
 
-struct LOGIC_STRUCT{
+struct IGBT_STRUCT{
 	int16	State;
 	int16	State_1;		// State_n means State*z^(-n)
 	int16	Turn;
 	int16	Count;
 };
 struct SPEED_STRUCT{
-	int32	Expect;
-	int32	MAX;
-	int32	Kp;
-	int32 	Kd;
-	int32 	Error;
-	int32 	Error_1;		// Error_n means Error*z^(-n)
-	int32 	Differential;
-	int32	Count;
+	int16	Expect;
+	int16	MAX;
+	int16	Kp;
+	int16 	Kd;
+	int16 	Error;
+	int16 	Error_1;		// Error_n means Error*z^(-n)
+	int16 	Differential;
 };
 struct TORQUE_STRUCT{
-	int32  	Expect;
-	int32	NEXT;
-	int32	LAST;
-	int32  	MAX;
-	int32 	Kp;
-	int32 	Ki;
-	int32 	Error;
-	int32 	Sample;
-	int32 	Integral;
-	int32 	Integral_Max;
-	int32 	Hysteresis;
+	int16  	Expect;
+	int16  	MAX;
+};
+struct CURRENT_STRUCT{
+	int16  	Expect;
+	int16  	MAX;
+	int16 	Kp;
+	int16 	Ki;
+	int16 	Error;
+	int16 	Error_1;
+	int16 	Sample;
+	int16 	Integral;
 };
 struct PWM_STRUCT{
-	int32  	MAX;
-	int32  	NOW;
-	int32  	NEXT;
-	int32 	LAST;
-	int32 	COM;
+	int16  	MAX;
+	int16 	Duty;
 };
 
-extern struct LOGIC_STRUCT			LOGIC;
-extern struct SPEED_STRUCT 			SPEED;
-extern struct TORQUE_STRUCT 		TORQUE;
-extern struct TORQUE_STRUCT 		TORQUE_AB;
-extern struct TORQUE_STRUCT 		TORQUE_BC;
-extern struct TORQUE_STRUCT 		TORQUE_CA;
-extern struct PWM_STRUCT			PWM;
+extern struct IGBT_STRUCT 		IGBT;
+extern struct SPEED_STRUCT 		SPEED;
+extern struct TORQUE_STRUCT 	TORQUE;
+extern struct CURRENT_STRUCT	CURRENT;
+extern struct PWM_STRUCT		PWM;
 
 extern Uint16 IU_ad;
 extern Uint16 IV_ad;
@@ -92,15 +92,10 @@ extern Uint16 IV_offset;
 extern Uint16 DBVD_offset;
 extern Uint16 Ref3V_offset;
 
-extern int16  Ia;
-extern int16  Ib;
-extern int16  Ic;
-
 extern int16  SRM_Direction;
 extern int16  SRM_SPEED;
 extern int16  SRM_ANGLE;
 extern int16  SRM_PHASE;
-extern int16  SRM_FIRST_RUN;
 
 #define PU_H 	1
 #define PU_L 	2
