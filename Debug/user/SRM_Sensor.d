@@ -34,6 +34,9 @@ user/SRM_Sensor.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c_defines.h
 user/SRM_Sensor.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma_defines.h
 user/SRM_Sensor.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_defines.h
 user/SRM_Sensor.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h
+user/SRM_Sensor.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h
+user/SRM_Sensor.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/linkage.h
+user/SRM_Sensor.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdarg.h
 
 ../user/SRM_Sensor.c: 
 ../user/SRD_Project.h: 
@@ -69,3 +72,6 @@ D:/ti/workspace_v6/SRD_xs/inc/F2806x_I2c_defines.h:
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Dma_defines.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_Cla_defines.h: 
 D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h: 
+D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h: 
+D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/linkage.h: 
+D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdarg.h: 
