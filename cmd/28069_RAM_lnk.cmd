@@ -134,7 +134,6 @@ SECTIONS
    
    SampData1        : > RAML6_8,    PAGE = 1
    SampData2        : > RAML6_8,    PAGE = 1
-   SampData3        : > RAML6_8,    PAGE = 1
 
   /* Uncomment the section below if calling the IQNexp() or IQexp()
       functions from the IQMath.lib library in order to utilize the

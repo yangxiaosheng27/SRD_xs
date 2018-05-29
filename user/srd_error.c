@@ -14,7 +14,7 @@ void Error_Checking(void);
 Uint16 ERROR		= 0;
 int16  MAX_SPEED	= 1500;		// 1 means the MAX Speed is 1r/min
 int16  MAX_U		= 1447;		// 1447 means the MAX U is about 350V
-int16  MAX_I		= 150;		// 50 means the MAX I is about 3A
+int16  MAX_I		= 100;		// 50 means the MAX I is about 3A
 
 void Error_Checking(void)
 {
@@ -32,9 +32,13 @@ void Error_Checking(void)
 	if(SRM_SPEED>MAX_SPEED||SRM_SPEED<-MAX_SPEED)								ERROR |= 0x0800;
 	if(EPwm1Regs.CMPA.half.CMPA*EPwm1Regs.CMPB||EPwm2Regs.CMPA.half.CMPA*EPwm2Regs.CMPB||EPwm3Regs.CMPA.half.CMPA*EPwm3Regs.CMPB)
 																				ERROR |= 0x1000;
+<<<<<<< HEAD
 //	if(SRM_Direction!=0 && SRM_Direction!=1)									ERROR |= 0x2000;
 	if(IGBT.State<-1 || IGBT.State>5)											ERROR |= 0x4000;
 	if(HOT_state == 1)
+=======
+//	if(HOT_state == 1)
+>>>>>>> parent of 6244d68... finish current control
 
 
 	if(ERROR)
@@ -42,14 +46,6 @@ void Error_Checking(void)
 		DRV_UP;									//H is disable
 		DINT;    								// Disable Interrupts at the CPU level:
 		CpuTimer0Regs.TCR.bit.TSS = 1;
-
-		EPwm1Regs.CMPA.half.CMPA = 0;
-		EPwm1Regs.CMPB			 = 0;
-		EPwm2Regs.CMPA.half.CMPA = 0;
-		EPwm2Regs.CMPB			 = 0;
-		EPwm3Regs.CMPA.half.CMPA = 0;
-		EPwm3Regs.CMPB			 = 0;
-
 		BR_UP;									//H is disable
 		SS_UP;									//H is disable
 		FAN_UP;									//H is disable

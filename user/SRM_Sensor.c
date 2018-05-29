@@ -70,7 +70,7 @@ void Get_Position(void)
 	if(temp_state!=LAST_state && temp_state==last_temp)
 	{
 		count_temp++;
-		if(count_temp>=4)/////////////note!/////////////////////////////////////////////////////////
+		if(count_temp>=3)/////////////note!/////////////////////////////////////////////////////////
 		{
 			count_temp=0;
 			NOW_state = temp_state;
