@@ -38,13 +38,15 @@ __interrupt void cpu_timer0_isr(void)
 	while (AdcRegs.ADCINTFLG.bit.ADCINT1 == 0){}		//Wait for ADCINT1
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;   			//Must clear ADCINT1 flag since INT1CONT = 0
 
-	Control_SRD();
+	Control_SRD_internal_loop();
+//	Test_SRD();
 	Sample1();
 	Sample2();
 	Sample3();
 
 	// Acknowledge this interrupt to receive more interrupts from group 1
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
+	ERROR.CPU_Timer0_Remain = CpuTimer0Regs.TIM.all;
 }
 
 __interrupt void cpu_timer1_isr(void)
@@ -64,45 +66,45 @@ volatile int16 SampData2[Data_Length]={0};
 volatile int16 SampData3[Data_Length]={0};
 void Sample1()
 {
-	static int16 Samp_count=0;
+	static int16 Samp_count = 0;
 	if(Samp_count<=Data_Length)
 	{
 		Samp_count++;
-		SampData1[Samp_count] = SRM_PHASE;
+		SampData1[Samp_count] = CURRENT.Ia;
 	}
-	else Samp_count = 0;
 }
 void Sample2()
 {
-	static int16 Samp_count=0;
+	static int16 Samp_count = 0;
 	if(Samp_count<=Data_Length)
 	{
 		Samp_count++;
-		SampData2[Samp_count] = TORQUE_AB.Expect;
+		SampData2[Samp_count] = PWM.NEXT;
 	}
-	else Samp_count = 0;
 }
 void Sample3()
 {
-	static int16 Samp_count=0;
+	static int16 Samp_count = 0;
+//	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
 	if(Samp_count<=Data_Length)
 	{
 		Samp_count++;
-		SampData3[Samp_count] = TORQUE_AB.Sample;
+		SampData3[Samp_count] = PWM.COM;
 	}
-	else Samp_count = 0;
 }
 
 void Test_SRD()
 {
-	PWM.NOW		=	700;
-
-	EPwm1Regs.CMPA.half.CMPA = PWM.NOW;
-	EPwm1Regs.CMPB			 = 0;
-	EPwm2Regs.CMPA.half.CMPA = 0;
-	EPwm2Regs.CMPB			 = PWM.NOW;
-	EPwm3Regs.CMPA.half.CMPA = 0;
-	EPwm3Regs.CMPB			 = 0;
+	SRM_FIRST_RUN = 0;
+	LOGIC.State = 0;
+	Get_State();
+	SRM_PHASE =	10;
+	TORQUE_Calculate();
+	TORQUE.Expect = 500;
+	TORQUE_Distribution();
+	TORQUE_Control();
+	Error_Checking();
+	IGBT_Control();
 }
 
 //===========================================================================

@@ -5,7 +5,8 @@
  *  Created on: 2018/3/26
  *  Author: 	yangxiaosheng
  */
-#include "SRD_Project.h"        // User's Funtions
+#include "SRD_Project.h"    // User's Funtions and Definitions
+//#define ENABLE_CONTROL	// Enable the IGBT control signal. Be careful to use it.
 
 main()
 {
@@ -19,10 +20,10 @@ main()
 	Init_SRD();				// Initialize the SRM
 	EINT;          			// Enable Global interrupt INTM
 	ERTM;          			// Enable Global realtime interrupt DBGM
-	//it will run Control_SRD() in CpuTimer0
+
 	while(1)
 	{
-
+							//Control_SRD() will run in CpuTimer0
 	}
 }
 //===========================================================================

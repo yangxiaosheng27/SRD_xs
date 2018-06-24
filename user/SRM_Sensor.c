@@ -8,12 +8,21 @@
 
 #include "SRD_Project.h"        // User's Funtions
 
+void My_Init_Sensor(void);
+void Get_Sensor(void);
 void Get_State(void);
+void Get_Hall(void);
 void Get_Position(void);
+void Get_Current(void);
 
-int16 Ia				= 0;		// 100 means 1.00A
-int16 Ib				= 0;
-int16 Ic				= 0;
+#define CURRENT_Coefficient 6	// Ia = (IU_ad - IU_offset) * CURRENT_Coefficient
+//	Filter: y = y_1*Filter_Coefficient1 + x*Filter_Coefficient2 + x_1*Filter_Coefficient3;
+#define Filter_Coefficient1 0.928550968482019
+#define Filter_Coefficient2 0.035724515758991
+#define Filter_Coefficient3 0.035724515758991
+
+struct CURRENT_STRUCT CURRENT;
+struct SRM_STRUCT SRM;
 
 Uint16 IU_ad			= 0;		// x+100 means y+6 A
 Uint16 IV_ad			= 0;
@@ -40,13 +49,32 @@ int16  LAST_state		= -1;		// -1 means first run
 int16  DRV_state		= -1;
 int16  SRM_FIRST_RUN	= 1;
 
+void My_Init_Sensor(void)
+{
+	CURRENT.Ia_1 = 0;
+	CURRENT.Ib_1 = 0;
+	CURRENT.Ic_1 = 0;
+	CURRENT.Ia_sam_1 = 0;
+	CURRENT.Ib_sam_1 = 0;
+	CURRENT.Ic_sam_1 = 0;
+	SRM.Speed = 0;
+	SRM.Position = 0;
+	SRM.Phase = 0;
+	SRM.Direction = 0;
+}
+
+void Get_Sensor(void)
+{
+	Get_State();
+	Get_Current();
+	Get_Hall();
+	Get_Position();
+}
+
 void Get_State(void)
 {
 	IU_ad	  =  IU_GET();
 	IV_ad	  =  IV_GET();
-	Ia		  =  (IU_ad - IU_offset)*6;
-	Ib		  =  (IV_ad - IV_offset)*6;
-	Ic		  =  -Ia - Ib;
 	DBVD_ad	  =  DBVD_GET();
 	Ref3V_ad  =  Ref3V_GET();
 	Ref0V_ad  =  Ref0V_GET();
@@ -57,7 +85,31 @@ void Get_State(void)
 	PC_state  =  PC_GET();
 }
 
-void Get_Position(void)
+void Get_Current(void)
+{
+	CURRENT.Ia_sam = ((int16)IU_ad - (int16)IU_offset) * CURRENT_Coefficient ;
+	CURRENT.Ib_sam = ((int16)IV_ad - (int16)IU_offset) * CURRENT_Coefficient ;
+	CURRENT.Ic_sam = - CURRENT.Ia_sam - CURRENT.Ib_sam;
+
+	CURRENT.Ia = CURRENT.Ia_1 * Filter_Coefficient1 + CURRENT.Ia_sam * Filter_Coefficient2 + CURRENT.Ia_sam_1 * Filter_Coefficient3;
+	CURRENT.Ib = CURRENT.Ib_1 * Filter_Coefficient1 + CURRENT.Ib_sam * Filter_Coefficient2 + CURRENT.Ib_sam_1 * Filter_Coefficient3;
+	CURRENT.Ic = - CURRENT.Ia - CURRENT.Ib;
+	CURRENT.Ia_1 = CURRENT.Ia;
+	CURRENT.Ib_1 = CURRENT.Ib;
+	CURRENT.Ic_1 = CURRENT.Ic;
+	CURRENT.Ia_sam_1 = CURRENT.Ia_sam;
+	CURRENT.Ib_sam_1 = CURRENT.Ib_sam;
+	CURRENT.Ic_sam_1 = CURRENT.Ic_sam;
+
+	CURRENT.Ia_abs = CURRENT.Ia>0?CURRENT.Ia:-CURRENT.Ia;
+	CURRENT.Ib_abs = CURRENT.Ib>0?CURRENT.Ib:-CURRENT.Ib;
+	CURRENT.Ic_abs = CURRENT.Ic>0?CURRENT.Ic:-CURRENT.Ic;
+/*	CURRENT.Ia_abs = CURRENT.Ia_sam>0?CURRENT.Ia_sam:-CURRENT.Ia_sam;
+	CURRENT.Ib_abs = CURRENT.Ib_sam>0?CURRENT.Ib_sam:-CURRENT.Ia_sam;
+	CURRENT.Ic_abs = CURRENT.Ic_sam>0?CURRENT.Ic_sam:-CURRENT.Ia_sam;*/
+}
+
+void Get_Hall(void)
 {
 	static int16 temp_state 	= 0;
 	static int16 last_temp 		= 0;
@@ -142,4 +194,14 @@ void Get_Position(void)
 	if		(SRM_PHASE > 75)		SRM_PHASE = 75;
 	else if	(SRM_PHASE < -75)		SRM_PHASE = -75;
 //	if(!NOW_state%2)	SRM_PHASE += 75;
+}
+
+void Get_Position(void)
+{
+	SRM.Position = EQep2Regs.QPOSCNT;
+}
+
+void Get_Speed(void)
+{
+	SRM.Speed = 1;
 }

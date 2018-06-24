@@ -17,15 +17,26 @@
 extern void My_Init_ADC(void);
 extern void My_Init_Cputimer(void);
 extern void My_Init_GPIO(void);
+extern void My_Init_EQEP(void);
 extern void My_Init_PWM(void);
+extern void My_Init_Sensor(void);
+extern void My_Init_Error(void);
 
 extern void Error_Checking(void);
 
-extern void Get_State(void);
-extern void Get_Position(void);
+extern void Get_Sensor(void);
+extern void Get_Speed(void);
 
 extern void Init_SRD(void);
-extern void Control_SRD(void);
+extern void Control_SRD_internal_loop(void);
+extern void Control_SRD_external_loop(void);
+
+// for test_control
+extern void SPEED_Control(void);
+extern void TORQUE_Calculate(void);
+extern void TORQUE_Distribution(void);
+extern void TORQUE_Control(void);
+extern void IGBT_Control(void);
 
 struct LOGIC_STRUCT{
 	int16	State;
@@ -64,6 +75,37 @@ struct PWM_STRUCT{
 	int32 	COM;
 };
 
+struct CURRENT_STRUCT{
+	double	Ia;			// Ia(filtter)
+	double	Ib;
+	double	Ic;
+	double	Ia_abs;		// |Ia(filtter)|
+	double	Ib_abs;
+	double	Ic_abs;
+	double	Ia_sam;		// Ia(sample)
+	double	Ib_sam;
+	double	Ic_sam;
+	double	Ia_sam_1;	// Ia(sample)*z^-1
+	double	Ib_sam_1;
+	double	Ic_sam_1;
+	double	Ia_1;		// Ia(filtter)*z^-1
+	double	Ib_1;
+	double	Ic_1;
+};
+
+struct ERROR_STRUCT{
+	Uint16	Code;
+	Uint16	Check_Count;
+	Uint16	CPU_Timer0_Remain;
+};
+
+struct SRM_STRUCT{
+	int16	Speed;
+	Uint16	Position;
+	Uint16	Phase;
+	int16	Direction;
+};
+
 extern struct LOGIC_STRUCT			LOGIC;
 extern struct SPEED_STRUCT 			SPEED;
 extern struct TORQUE_STRUCT 		TORQUE;
@@ -71,6 +113,9 @@ extern struct TORQUE_STRUCT 		TORQUE_AB;
 extern struct TORQUE_STRUCT 		TORQUE_BC;
 extern struct TORQUE_STRUCT 		TORQUE_CA;
 extern struct PWM_STRUCT			PWM;
+extern struct CURRENT_STRUCT		CURRENT;
+extern struct SRM_STRUCT 			SRM;
+extern struct ERROR_STRUCT 			ERROR;
 
 extern Uint16 IU_ad;
 extern Uint16 IV_ad;
@@ -91,10 +136,6 @@ extern Uint16 IU_offset;
 extern Uint16 IV_offset;
 extern Uint16 DBVD_offset;
 extern Uint16 Ref3V_offset;
-
-extern int16  Ia;
-extern int16  Ib;
-extern int16  Ic;
 
 extern int16  SRM_Direction;
 extern int16  SRM_SPEED;

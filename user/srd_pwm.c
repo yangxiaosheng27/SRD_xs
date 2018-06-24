@@ -44,11 +44,11 @@ void InitEPwm1Regs()
 {
    // Setup TBCLK
    EPwm1Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
-   EPwm1Regs.TBPRD = 1000;                    // Set timer period
+   EPwm1Regs.TBPRD = 1000;                    // Set timer period (2250 means PWM period = 20kHz, 1000 means 45kHz)
    EPwm1Regs.TBCTL.bit.PHSEN = TB_DISABLE;    // Disable phase loading
    EPwm1Regs.TBPHS.half.TBPHS = 0x0000;       // Phase is 0
    EPwm1Regs.TBCTR = 0x0000;                  // Clear counter
-   EPwm1Regs.TBCTL.bit.HSPCLKDIV = TB_DIV2;   // Clock ratio to SYSCLKOUT
+   EPwm1Regs.TBCTL.bit.HSPCLKDIV = TB_DIV2;   // Clock ratio to SYSCLKOUT (90MHz)
    EPwm1Regs.TBCTL.bit.CLKDIV = TB_DIV2;
 
    // Setup shadow register load on ZERO

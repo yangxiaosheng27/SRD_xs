@@ -318,7 +318,7 @@ void InitPeripheralClocks(void)
    SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC  = 0;    // Enable TBCLK within the ePWM
 
    SysCtrlRegs.PCLKCR1.bit.EQEP1ENCLK = 0;    // eQEP1
-   SysCtrlRegs.PCLKCR1.bit.EQEP2ENCLK = 0;    // eQEP2
+   SysCtrlRegs.PCLKCR1.bit.EQEP2ENCLK = 1;    // eQEP2
 
    SysCtrlRegs.PCLKCR1.bit.ECAP1ENCLK = 0;    // eCAP1
    SysCtrlRegs.PCLKCR1.bit.ECAP2ENCLK = 0;    // eCAP2

@@ -9,6 +9,10 @@
 #include <stdio.h>
 
 void Init_SRD(void);
+void Control_SRD_internal_loop(void);
+void Control_SRD_external_loop(void);
+
+void My_Init_Control(void);
 void LOGIC_Control(void);
 void SPEED_Control(void);
 void TORQUE_Calculate(void);
@@ -23,7 +27,7 @@ void IGBT_Control(void);
 #define TORQUE_MAX 			2000		// 1000 means 1.000 N*m
 #define TORQUE_Kp			100
 #define TORQUE_Ki			3
-#define TORQUE_Hysteresis	200			// used in Theta_ov
+#define TORQUE_Hysteresis	20			// used in Theta_ov
 #define PWM_MAX				1000		// 1000	means 100% duty
 #define Theta_ov			20			// 20	means 2 deg
 
@@ -43,7 +47,38 @@ void Init_SRD(void)
 	SS_UP;					//H is Disaable
 	FAN_UP;					//H is Disaable
 	My_Init_PWM();
+	My_Init_Control();
+	My_Init_Sensor();
+	My_Init_EQEP();
+	My_Init_Error();
 
+	printf("Hi,YangXiaoSheng!\nPress \"Enter\" to run the SRM.\n");
+	getchar();
+
+#ifdef	ENABLE_CONTROL
+	printf("SRM is Runing.\n");
+#else
+	printf("SRM is NOT Runing.\n");
+#endif
+
+	SS_DN;					//L is Enable
+	FAN_DN;					//L is Enable
+
+	DELAY_US(1000000L);
+	My_Init_ADC();
+	Error_Checking();
+
+#ifdef	ENABLE_CONTROL
+	DRV_DN;					//DRV_DN will enable the IGBT control signal. Be careful to use it.
+#else
+	DRV_UP;
+#endif
+
+	My_Init_Cputimer();
+}
+
+void My_Init_Control(void)
+{
 	//Init Control Parameters
 	LOGIC.Turn 			= 0;
 	LOGIC.State 		= -1; //first run
@@ -76,37 +111,23 @@ void Init_SRD(void)
 	TORQUE_CA.Error		= 0;
 	TORQUE_CA.Integral	= 0;
 	TORQUE_CA.Integral_Max	= PWM_MAX / TORQUE_Ki;
-
-	printf("Hi,YangXiaoSheng!\nPress \"Enter\" to run the SRM.\n");
-	getchar();
-	printf("SRM is Runing.\n");
-
-	SS_DN;					//L is Enable
-	FAN_DN;					//L is Enable
-
-	DELAY_US(1000000L);
-	My_Init_ADC();
-	Error_Checking();
-//	DRV_DN;					//DRV_DN will enable the control signal! Be careful!
-	My_Init_Cputimer();
 }
 
-void Control_SRD(void)
+void Control_SRD_internal_loop(void)
 {
-	Get_State();
-	Get_Position();
+	Get_Sensor();
 	LOGIC_Control();
 	SPEED.Count++;
-	if(SPEED.Count >= 5)
-	{
-		SPEED_Control();
-		SPEED.Count = 0;
-	}
 	TORQUE_Calculate();
 	TORQUE_Distribution();
 	TORQUE_Control();
 	Error_Checking();
 	IGBT_Control();
+}
+void Control_SRD_external_loop(void)
+{
+	Get_Speed();
+	SPEED_Control();
 }
 
 void LOGIC_Control(void)
@@ -177,11 +198,13 @@ int32 TORQUE_Model[6][30]={
 void TORQUE_Calculate(void)
 {
 	int32 I_index,I_ratio,theta_index,theta_ratio;
-	int32 Ia_abs = Ia>0?Ia:(-Ia);
-	int32 Ib_abs = Ib>0?Ib:(-Ib);
-	int32 Ic_abs = Ic>0?Ic:(-Ic);
-	Ib_abs = Ib>0?Ib:(-Ib);
-	Ic_abs = Ic>0?Ic:(-Ic);
+	int32 Ia_abs;
+	int32 Ib_abs;
+	int32 Ic_abs;
+	Ia_abs = CURRENT.Ia_abs;
+	Ib_abs = CURRENT.Ib_abs;
+	Ic_abs = CURRENT.Ic_abs;
+
 	//限制电流!!!!!!!!!!!!!!!
 	switch(LOGIC.State)
 	{
@@ -514,7 +537,7 @@ void IGBT_Control(void)
 	if(alpha[0] && alpha[1] || alpha[2] && alpha[3] || alpha[4] && alpha[5])
 	{
 		DRV_UP;
-		while(1);	// big error!
+		while(1);	// error!
 	}
 	else
 	{
