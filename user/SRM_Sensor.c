@@ -212,18 +212,43 @@ void Get_Position(void)
 	else SRM.Direction = -1;
 }
 
+#define Filter_s1 1.5610180758007182
+#define Filter_s2 -0.64135153805756318
+#define Filter_s3 0.020083365564211236
+#define Filter_s4 0.040166731128422471
+#define Filter_s5 0.020083365564211236
+
 void Get_Speed(void)
 {
 	static int16 error_flag = 0;
-	static int16 last_Position = 0;
+	static int16 now_Position,last_Position = 0;
 	static int16 _temp;
 	int16 _max = 2048*4;
 	int16 _half = 2048*2;
-
-	_temp = SRM.Position-last_Position;
+	static int32 now_time=0,last_time=0;
+	static float deta_time=0,speed=0,speed_1=0,speed_2=0,y_1=0,y_2=0;
+	now_Position = EQep2Regs.QPOSCNT;
+	_temp = now_Position-last_Position;
 	if(_temp > _half)_temp-=_max;
 	else if(_temp < -_half) _temp+=_max;
+
+	now_time = EQep2Regs.QCTMRLAT;
+	if(EQep2Regs.QEPSTS.bit.COEF)
+	{
+		EQep2Regs.QEPSTS.bit.COEF = 1;
+		deta_time =	0;
+	}
+	else if(error_flag)
+		deta_time =	(now_time-last_time)/90000.0;	//ms
+	last_time = now_time;
+
 	if(EQep2Regs.QEPSTS.bit.PCEF && error_flag==0)	error_flag = 1;
-	else	SRM.Speed = (float32)_temp*7.32421875;	//if no error flag
+	else	speed = (float32)_temp*7.32421875*(1-deta_time);	//if no error flag
 	last_Position = SRM.Position;
+
+	SRM.Speed = Filter_s1*y_1 + Filter_s2*y_2 + Filter_s3*speed + Filter_s4*speed_1 + Filter_s5*speed_2;
+	y_2 = y_1;
+	y_1 = SRM.Speed;
+	speed_2 = speed_1;
+	speed_1 = speed;
 }

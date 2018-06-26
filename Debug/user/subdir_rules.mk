@@ -10,6 +10,13 @@ user/SRM_Sensor.obj: ../user/SRM_Sensor.c $(GEN_OPTS) $(GEN_HDRS)
 	@echo 'Finished building: $<'
 	@echo ' '
 
+user/light_matrix.obj: ../user/light_matrix.c $(GEN_OPTS) $(GEN_HDRS)
+	@echo 'Building file: $<'
+	@echo 'Invoking: C2000 Compiler'
+	"D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/bin/cl2000" -v28 -ml -mt --vcu_support=vcu0 --cla_support=cla0 --float_support=fpu32 --include_path="D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include" --include_path="D:/ti/workspace_v6/SRD_xs/inc" --advice:performance=all -g --display_error_number --diag_warning=225 --diag_wrap=off --preproc_with_compile --preproc_dependency="user/light_matrix.d" --obj_directory="user" $(GEN_OPTS__FLAG) "$<"
+	@echo 'Finished building: $<'
+	@echo ' '
+
 user/main.obj: ../user/main.c $(GEN_OPTS) $(GEN_HDRS)
 	@echo 'Building file: $<'
 	@echo 'Invoking: C2000 Compiler'

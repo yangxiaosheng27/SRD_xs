@@ -5,6 +5,7 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../user/SRM_Sensor.c \
+../user/light_matrix.c \
 ../user/main.c \
 ../user/srd_adc.c \
 ../user/srd_control.c \
@@ -16,6 +17,7 @@ C_SRCS += \
 
 OBJS += \
 ./user/SRM_Sensor.obj \
+./user/light_matrix.obj \
 ./user/main.obj \
 ./user/srd_adc.obj \
 ./user/srd_control.obj \
@@ -27,6 +29,7 @@ OBJS += \
 
 C_DEPS += \
 ./user/SRM_Sensor.d \
+./user/light_matrix.d \
 ./user/main.d \
 ./user/srd_adc.d \
 ./user/srd_control.d \
@@ -38,6 +41,7 @@ C_DEPS += \
 
 C_DEPS__QUOTED += \
 "user\SRM_Sensor.d" \
+"user\light_matrix.d" \
 "user\main.d" \
 "user\srd_adc.d" \
 "user\srd_control.d" \
@@ -49,6 +53,7 @@ C_DEPS__QUOTED += \
 
 OBJS__QUOTED += \
 "user\SRM_Sensor.obj" \
+"user\light_matrix.obj" \
 "user\main.obj" \
 "user\srd_adc.obj" \
 "user\srd_control.obj" \
@@ -60,6 +65,7 @@ OBJS__QUOTED += \
 
 C_SRCS__QUOTED += \
 "../user/SRM_Sensor.c" \
+"../user/light_matrix.c" \
 "../user/main.c" \
 "../user/srd_adc.c" \
 "../user/srd_control.c" \
