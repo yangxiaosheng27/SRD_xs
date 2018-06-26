@@ -39,7 +39,11 @@ void My_Init_EQEP(void)
 
 void eqep2_isr(void)
 {
+	static Uint16 EQEP2_InterruptCount = 0;
+	EQEP2_InterruptCount++;
 	Control_SRD_external_loop();
-    EQep1Regs.QCLR.bit.UTO=1;                   // Clear interrupt flag
+    EQep2Regs.QCLR.bit.UTO=1;                   // Clear interrupt flag
+    EQep2Regs.QCLR.bit.INT=1;                   // Clear interrupt flag
+	PieCtrlRegs.PIEACK.all = PIEACK_GROUP5;
 }
 

@@ -6,11 +6,9 @@
  *  Author: 	yangxiaosheng
  */
 #include "SRD_Project.h"    // User's Funtions and Definitions
-//#define ENABLE_CONTROL	// Enable the IGBT control signal. Be careful to use it.
 
 main()
 {
-
 	InitSysCtrl();			// PLL, WatchDog, enable Peripheral Clocks
     DINT;    				// Disable Interrupts at the CPU level:
 	InitPieCtrl();			// Initialize the PIE control registers to their default state.
@@ -23,7 +21,7 @@ main()
 
 	while(1)
 	{
-							//Control_SRD() will run in CpuTimer0
+							//Control_SRD() will run in cpu_timer0_isr() and eqep2_isr()
 	}
 }
 //===========================================================================

@@ -22,8 +22,8 @@ void My_Init_Cputimer()
    PieVectTable.TINT1 = &cpu_timer1_isr;
    EDIS;    								// This is needed to disable write to EALLOW protected registers
    InitCpuTimers();   						// For this example, only initialize the Cpu Timers
-   ConfigCpuTimer(&CpuTimer0, 90, 20);		// Configure CPU-Timer0, 90 is CPUFreq, 20 is uSeconds
-   ConfigCpuTimer(&CpuTimer1, 90, 50);		// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
+   ConfigCpuTimer(&CpuTimer0, 90, 50);		// Configure CPU-Timer0, 90 is CPUFreq, 20 is uSeconds
+   ConfigCpuTimer(&CpuTimer1, 90, 1000);		// Configure CPU-Timer1, 90 is CPUFreq, 1000 is uSeconds
    IER |= M_INT1;							// Enable CPU int1 which is connected to CPU-Timer 0
    IER |= M_INT13;							// Enable CPU int13 which is connected to CPU-Timer 1
    PieCtrlRegs.PIEIER1.bit.INTx7 = 1;		// Enable TINT0 in the PIE: Group 1 interrupt 7
@@ -39,7 +39,7 @@ __interrupt void cpu_timer0_isr(void)
 	AdcRegs.ADCINTFLGCLR.bit.ADCINT1 = 1;   			//Must clear ADCINT1 flag since INT1CONT = 0
 
 	Control_SRD_internal_loop();
-//	Test_SRD();
+//	Test_SRD();		//for test
 	Sample1();
 	Sample2();
 	Sample3();
@@ -57,7 +57,7 @@ __interrupt void cpu_timer1_isr(void)
 //	Sample3();
 }
 
-#define Data_Length 3000
+#define Data_Length 6000
 #pragma DATA_SECTION(SampData1,"SampData1");
 volatile int16 SampData1[Data_Length]={0};
 #pragma DATA_SECTION(SampData2,"SampData2");
@@ -67,19 +67,21 @@ volatile int16 SampData3[Data_Length]={0};
 void Sample1()
 {
 	static int16 Samp_count = 0;
+//	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
 	if(Samp_count<=Data_Length)
 	{
 		Samp_count++;
-		SampData1[Samp_count] = CURRENT.Ia;
+		SampData1[Samp_count] = TORQUE_AB.Integral;
 	}
 }
 void Sample2()
 {
 	static int16 Samp_count = 0;
+//	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
 	if(Samp_count<=Data_Length)
 	{
 		Samp_count++;
-		SampData2[Samp_count] = PWM.NEXT;
+		SampData2[Samp_count] = TORQUE_AB.Sample;
 	}
 }
 void Sample3()
@@ -89,20 +91,22 @@ void Sample3()
 	if(Samp_count<=Data_Length)
 	{
 		Samp_count++;
-		SampData3[Samp_count] = PWM.COM;
+		SampData3[Samp_count] = TORQUE_AB.Error;
 	}
 }
 
 void Test_SRD()
 {
-	SRM_FIRST_RUN = 0;
+//	SRM_FIRST_RUN = 0;
 	LOGIC.State = 0;
-	Get_State();
-	SRM_PHASE =	10;
+	Get_Sensor();
+	SRM_PHASE =	SRM.Phase;
+	SRM.Phase =	30;
 	TORQUE_Calculate();
-	TORQUE.Expect = 500;
+	TORQUE.Expect = 1000;
 	TORQUE_Distribution();
 	TORQUE_Control();
+	SRM.Speed =	1;
 	Error_Checking();
 	IGBT_Control();
 }

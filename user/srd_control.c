@@ -20,14 +20,14 @@ void TORQUE_Distribution(void);
 void TORQUE_Control(void);
 void IGBT_Control(void);
 
-#define SPEED_Expect 		1000		// 1000 means 1000	r/min
+#define SPEED_Expect 		500		// 1000 means 1000	r/min
 #define SPEED_MAX			1500		// 1000 means 1000	r/min
 #define SPEED_Kp 			3
 #define SPEED_Kd 			0
-#define TORQUE_MAX 			2000		// 1000 means 1.000 N*m
+#define TORQUE_MAX 			2500		// 1000 means 1.000 N*m
 #define TORQUE_Kp			100
-#define TORQUE_Ki			3
-#define TORQUE_Hysteresis	20			// used in Theta_ov
+#define TORQUE_Ki			10
+#define TORQUE_Hysteresis	10			// used in Theta_ov
 #define PWM_MAX				1000		// 1000	means 100% duty
 #define Theta_ov			20			// 20	means 2 deg
 
@@ -49,7 +49,6 @@ void Init_SRD(void)
 	My_Init_PWM();
 	My_Init_Control();
 	My_Init_Sensor();
-	My_Init_EQEP();
 	My_Init_Error();
 
 	printf("Hi,YangXiaoSheng!\nPress \"Enter\" to run the SRM.\n");
@@ -75,6 +74,24 @@ void Init_SRD(void)
 #endif
 
 	My_Init_Cputimer();
+	My_Init_EQEP();
+}
+
+void Control_SRD_internal_loop(void)
+{
+	Get_Sensor();
+	LOGIC_Control();
+	SPEED.Count++;
+	TORQUE_Calculate();
+	TORQUE_Distribution();
+	TORQUE_Control();
+	Error_Checking();
+	IGBT_Control();
+}
+void Control_SRD_external_loop(void)
+{
+	Get_Speed();
+	SPEED_Control();
 }
 
 void My_Init_Control(void)
@@ -113,29 +130,13 @@ void My_Init_Control(void)
 	TORQUE_CA.Integral_Max	= PWM_MAX / TORQUE_Ki;
 }
 
-void Control_SRD_internal_loop(void)
-{
-	Get_Sensor();
-	LOGIC_Control();
-	SPEED.Count++;
-	TORQUE_Calculate();
-	TORQUE_Distribution();
-	TORQUE_Control();
-	Error_Checking();
-	IGBT_Control();
-}
-void Control_SRD_external_loop(void)
-{
-	Get_Speed();
-	SPEED_Control();
-}
-
 void LOGIC_Control(void)
 {
 	LOGIC.State_1 = LOGIC.State;
 
 	if(SRM_FIRST_RUN)	//first run
 	{
+		SRM.Phase = 140;	// to calculate T in first run
 		switch(NOW_state)
 		{
 		case 1:	LOGIC.State = 0; LOGIC.Count = 0;	break;
@@ -153,6 +154,8 @@ void LOGIC_Control(void)
 		{
 			LOGIC.Count = 0;
 			if(++LOGIC.State>=6) LOGIC.State -= 6;
+			SRM.Phase_Bias = 3600 - SRM.Angle;	//what the phase bias should be
+			SRM.Phase = 0;
 		}
 		switch(NOW_state)
 		{
@@ -178,14 +181,6 @@ void LOGIC_Control(void)
 	else								LOGIC.Turn = 1;
 }
 
-void SPEED_Control(void)
-{
-	SPEED.Error = SPEED.Expect - SRM_SPEED;
-	TORQUE.Expect = SPEED.Kp * SPEED.Error;
-	if(SRM_FIRST_RUN)	TORQUE.Expect = TORQUE.MAX ;
-	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX/2;
-}
-
 int32 TORQUE_Model[6][30]={
 		{   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
 		{  60,   65,   90,   80,   80,  100,  100,   80,  120,  150,  120,  100,  110,   90,   40,   20,   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
@@ -206,40 +201,45 @@ void TORQUE_Calculate(void)
 	Ic_abs = CURRENT.Ic_abs;
 
 	//限制电流!!!!!!!!!!!!!!!
+	if(Ia_abs>=500)Ia_abs=499;
+	if(Ib_abs>=500)Ib_abs=499;
+	if(Ic_abs>=500)Ic_abs=499;
+
+
 	switch(LOGIC.State)
 	{
 	case  0:
-	case  3:	theta_index 		= SRM_PHASE/10;
-				theta_ratio 		= SRM_PHASE%10*10;			// 1 means 1%
+	case  3:	theta_index 		= SRM.Phase/10;
+				theta_ratio 		= SRM.Phase%10*10;			// 1 means 1%
 				I_index 			= Ia_abs/100;
 				I_ratio 			= Ia_abs%100;			// 1 means 1%
 				TORQUE_AB.Sample 	= GET_TORQUE;
-				theta_index			= SRM_PHASE/10 + 15;
+				theta_index			= SRM.Phase/10 + 15;
 				I_index 			= Ic_abs/100;
 				I_ratio 			= Ic_abs%100;			// 1 means 1%
 				TORQUE_BC.Sample 	= GET_TORQUE;
 				TORQUE_CA.Sample 	= 0;
 				break;
 	case  1:
-	case  4:	theta_index 		= SRM_PHASE/10 + 15;
-				theta_ratio 		= SRM_PHASE%10*10;			// 1 means 1%
+	case  4:	theta_index 		= SRM.Phase/10 + 15;
+				theta_ratio 		= SRM.Phase%10*10;			// 1 means 1%
 				I_index 			= Ib_abs/100;
 				I_ratio 			= Ib_abs%100;			// 1 means 1%
 				TORQUE_AB.Sample 	= GET_TORQUE;
 				TORQUE_BC.Sample 	= 0;
-				theta_index 		= SRM_PHASE/10;
+				theta_index 		= SRM.Phase/10;
 				I_index 			= Ic_abs/100;
 				I_ratio 			= Ic_abs%100;			// 1 means 1%
 				TORQUE_CA.Sample 	= GET_TORQUE;
 				break;
 	case  2:
 	case  5:	TORQUE_AB.Sample 	= 0;
-				theta_index 		= SRM_PHASE/10;
-				theta_ratio 		= SRM_PHASE%10*10;			// 1 means 1%
+				theta_index 		= SRM.Phase/10;
+				theta_ratio 		= SRM.Phase%10*10;			// 1 means 1%
 				I_index 			= Ib_abs/100;
 				I_ratio 			= Ib_abs%100;			// 1 means 1%
 				TORQUE_BC.Sample 	= GET_TORQUE;
-				theta_index 		= SRM_PHASE/10 + 15;
+				theta_index 		= SRM.Phase/10 + 15;
 				I_index 			= Ia_abs/100;
 				I_ratio 			= Ia_abs%100;			// 1 means 1%
 				TORQUE_CA.Sample 	= GET_TORQUE;
@@ -250,9 +250,13 @@ void TORQUE_Calculate(void)
 
 void TORQUE_Distribution(void)
 {
-	if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	if(SRM_FIRST_RUN)
 	{
-		TORQUE.NEXT = TORQUE.Expect*SRM_PHASE/Theta_ov;
+		TORQUE.Expect = 1500;
+	}
+	if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
+	{
+		TORQUE.NEXT = TORQUE.Expect*SRM.Phase/Theta_ov;
 		TORQUE.LAST = TORQUE.Expect-TORQUE.NEXT;
 		switch(LOGIC.State)
 		{
@@ -276,6 +280,7 @@ void TORQUE_Distribution(void)
 	}
 	else
 	{
+		TORQUE.NEXT = TORQUE.LAST = 0;
 		switch(LOGIC.State)
 		{
 		case  0:
@@ -302,12 +307,20 @@ void TORQUE_Control(void)
 {
 	if(LOGIC.Turn)
 	{
-		TORQUE_AB.Integral = TORQUE_BC.Integral = TORQUE_CA.Integral = 0;
+		switch(LOGIC.State)
+		{
+		case  0:
+		case  3:TORQUE_AB.Integral = 0;break;
+		case  1:
+		case  4:TORQUE_CA.Integral = 0;break;
+		case  2:
+		case  5:TORQUE_BC.Integral = 0;break;
+		}
 	}
 	switch(LOGIC.State)
 	{
 	case  0:
-	case  3:if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case  3:if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 			{
 				TORQUE_AB.Error = TORQUE_AB.Expect - TORQUE_AB.Sample;
 				TORQUE_AB.Integral += TORQUE_AB.Error;
@@ -341,7 +354,7 @@ void TORQUE_Control(void)
 			}
 			break;
 	case  1:
-	case  4:if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case  4:if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 			{
 				TORQUE_CA.Error = TORQUE_CA.Expect - TORQUE_CA.Sample;
 				TORQUE_CA.Integral += TORQUE_CA.Error;
@@ -375,7 +388,7 @@ void TORQUE_Control(void)
 			}
 			break;
 	case  2:
-	case  5:if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case  5:if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 			{
 				TORQUE_BC.Error = TORQUE_BC.Expect - TORQUE_BC.Sample;
 				TORQUE_BC.Integral += TORQUE_BC.Error;
@@ -418,7 +431,7 @@ void IGBT_Control(void)
 {
 	switch(LOGIC.State)
 	{
-		case 0:	if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+		case 0:	if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 				{
 					alpha[0] 	= (Uint16)PWM.NEXT;
 					alpha[1]	= 0;
@@ -437,7 +450,7 @@ void IGBT_Control(void)
 					alpha[5]	= 0;
 				}
 				break;
-	case 1:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case 1:		if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 				{
 					alpha[0] 	= (Uint16)PWM.COM;
 					alpha[1]	= 0;
@@ -456,7 +469,7 @@ void IGBT_Control(void)
 					alpha[5]	= (Uint16)PWM.NOW;
 				}
 				break;
-	case 2:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case 2:		if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 				{
 					alpha[0] 	= (Uint16)PWM.LAST;
 					alpha[1]	= 0;
@@ -475,7 +488,7 @@ void IGBT_Control(void)
 					alpha[5]	= (Uint16)PWM.NOW;
 				}
 				break;
-	case 3:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case 3:		if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 				{
 					alpha[0] 	= 0;
 					alpha[1]	= (Uint16)PWM.NEXT;
@@ -494,7 +507,7 @@ void IGBT_Control(void)
 					alpha[5]	= 0;
 				}
 				break;
-	case 4:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case 4:		if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 				{
 					alpha[0] 	= 0;
 					alpha[1]	= (Uint16)PWM.COM;
@@ -513,7 +526,7 @@ void IGBT_Control(void)
 					alpha[5]	= 0;
 				}
 				break;
-	case 5:		if(SRM_PHASE<=Theta_ov&&SRM_PHASE>=0&&!SRM_FIRST_RUN)
+	case 5:		if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 				{
 					alpha[0] 	= 0;
 					alpha[1]	= (Uint16)PWM.LAST;
@@ -549,6 +562,15 @@ void IGBT_Control(void)
 		EPwm3Regs.CMPB			 = alpha[5];
 	}
 }
+
+void SPEED_Control(void)
+{
+	SPEED.Error = SPEED.Expect - SRM.Speed;
+	TORQUE.Expect = SPEED.Kp * SPEED.Error;
+	if(SRM_FIRST_RUN)	TORQUE.Expect = TORQUE.MAX ;
+	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX;
+}
+
 
 //===========================================================================
 // No more.

@@ -58,9 +58,11 @@ void My_Init_Sensor(void)
 	CURRENT.Ib_sam_1 = 0;
 	CURRENT.Ic_sam_1 = 0;
 	SRM.Speed = 0;
-	SRM.Position = 0;
-	SRM.Phase = 0;
+	SRM.Position = 0;	//2048*4 means 360deg
+	SRM.Phase = 74;	 	// 75 means 7.5deg
+	SRM.Phase_Bias = 0;
 	SRM.Direction = 0;
+	SRM.Angle = 0;
 }
 
 void Get_Sensor(void)
@@ -104,9 +106,10 @@ void Get_Current(void)
 	CURRENT.Ia_abs = CURRENT.Ia>0?CURRENT.Ia:-CURRENT.Ia;
 	CURRENT.Ib_abs = CURRENT.Ib>0?CURRENT.Ib:-CURRENT.Ib;
 	CURRENT.Ic_abs = CURRENT.Ic>0?CURRENT.Ic:-CURRENT.Ic;
+
 /*	CURRENT.Ia_abs = CURRENT.Ia_sam>0?CURRENT.Ia_sam:-CURRENT.Ia_sam;
-	CURRENT.Ib_abs = CURRENT.Ib_sam>0?CURRENT.Ib_sam:-CURRENT.Ia_sam;
-	CURRENT.Ic_abs = CURRENT.Ic_sam>0?CURRENT.Ic_sam:-CURRENT.Ia_sam;*/
+	CURRENT.Ib_abs = CURRENT.Ib_sam>0?CURRENT.Ib_sam:-CURRENT.Ib_sam;
+	CURRENT.Ic_abs = CURRENT.Ic_sam>0?CURRENT.Ic_sam:-CURRENT.Ic_sam;*/
 }
 
 void Get_Hall(void)
@@ -198,10 +201,29 @@ void Get_Hall(void)
 
 void Get_Position(void)
 {
+	static int16 last_phase = 0;
 	SRM.Position = EQep2Regs.QPOSCNT;
+	SRM.Angle = (Uint16)((float32)SRM.Position*0.439453125);
+	SRM.Phase = (SRM.Angle + SRM.Phase_Bias)%150;
+	if(((int16)SRM.Phase - last_phase)<-100 && LOGIC.Turn == 0)SRM.Phase=149;
+	last_phase = SRM.Phase;
+
+	if(EQep2Regs.QEPSTS.bit.QDF||!SRM.Speed)SRM.Direction = 1;
+	else SRM.Direction = -1;
 }
 
 void Get_Speed(void)
 {
-	SRM.Speed = 1;
+	static int16 error_flag = 0;
+	static int16 last_Position = 0;
+	static int16 _temp;
+	int16 _max = 2048*4;
+	int16 _half = 2048*2;
+
+	_temp = SRM.Position-last_Position;
+	if(_temp > _half)_temp-=_max;
+	else if(_temp < -_half) _temp+=_max;
+	if(EQep2Regs.QEPSTS.bit.PCEF && error_flag==0)	error_flag = 1;
+	else	SRM.Speed = (float32)_temp*7.32421875;	//if no error flag
+	last_Position = SRM.Position;
 }

@@ -6,6 +6,8 @@
  *  Author: 	yangxiaosheng
  */
 
+#define ENABLE_CONTROL	// Enable the IGBT control signal. Be careful to use it.
+
 #include "F2806x_Cla_typedefs.h"// F2806x CLA Type definitions
 #include "F2806x_Device.h"      // F2806x Headerfile Include File
 #include "F2806x_Examples.h"   	// F2806x Examples Include File
@@ -76,21 +78,21 @@ struct PWM_STRUCT{
 };
 
 struct CURRENT_STRUCT{
-	double	Ia;			// Ia(filtter)
-	double	Ib;
-	double	Ic;
-	double	Ia_abs;		// |Ia(filtter)|
-	double	Ib_abs;
-	double	Ic_abs;
-	double	Ia_sam;		// Ia(sample)
-	double	Ib_sam;
-	double	Ic_sam;
-	double	Ia_sam_1;	// Ia(sample)*z^-1
-	double	Ib_sam_1;
-	double	Ic_sam_1;
-	double	Ia_1;		// Ia(filtter)*z^-1
-	double	Ib_1;
-	double	Ic_1;
+	float32	Ia;			// Ia(filtter)
+	float32	Ib;
+	float32	Ic;
+	float32	Ia_abs;		// |Ia(filtter)|
+	float32	Ib_abs;
+	float32	Ic_abs;
+	float32	Ia_sam;		// Ia(sample)
+	float32	Ib_sam;
+	float32	Ic_sam;
+	float32	Ia_sam_1;	// Ia(sample)*z^-1
+	float32	Ib_sam_1;
+	float32	Ic_sam_1;
+	float32	Ia_1;		// Ia(filtter)*z^-1
+	float32	Ib_1;
+	float32	Ic_1;
 };
 
 struct ERROR_STRUCT{
@@ -100,9 +102,11 @@ struct ERROR_STRUCT{
 };
 
 struct SRM_STRUCT{
-	int16	Speed;
+	float32	Speed;
 	Uint16	Position;
+	Uint16	Angle;
 	Uint16	Phase;
+	Uint16	Phase_Bias;
 	int16	Direction;
 };
 
@@ -116,6 +120,8 @@ extern struct PWM_STRUCT			PWM;
 extern struct CURRENT_STRUCT		CURRENT;
 extern struct SRM_STRUCT 			SRM;
 extern struct ERROR_STRUCT 			ERROR;
+
+extern Uint16 alpha[6];
 
 extern Uint16 IU_ad;
 extern Uint16 IV_ad;
