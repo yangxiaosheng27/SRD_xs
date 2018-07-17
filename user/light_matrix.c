@@ -20,6 +20,7 @@
 #include "light_matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define MAT_LEGAL_CHECKING
 
@@ -38,12 +39,12 @@ void swap(int *a, int *b)
 	*b = m;
 }
  
-void perm(int list[], int k, int m, int* p, Mat* mat, float* det) 
+void perm(int list[], int k, int m, int* p, Mat* mat, MatType* det)
 {
 	int i;
 
 	if(k > m){
-		float res = mat->element[0][list[0]];
+		MatType res = mat->element[0][list[0]];
 
 		for(i = 1; i < mat->row ; i++){
 			res *= mat->element[i][list[i]];
@@ -78,7 +79,7 @@ void perm(int list[], int k, int m, int* p, Mat* mat, float* det)
 /*                           Public Function                            */
 /************************************************************************/
 
-Mat* MatAmplify(Mat* mat, float num, Mat* dst)
+Mat* MatAmplify(Mat* mat, MatType num, Mat* dst)
 {
 	int row,col;
 
@@ -91,17 +92,15 @@ Mat* MatAmplify(Mat* mat, float num, Mat* dst)
 	return dst;
 }
 
-Mat* MatDiv(Mat* mat, float num, Mat* dst)
+Mat* MatDiv(Mat* mat, MatType num, Mat* dst)
 {
 	int row,col;
-
-	if(num==0)num=1.4E-45;
+	if(num == 0.0) num = 0.000001;
 	for(row = 0 ; row < mat->row ; row++){
 		for(col = 0 ; col < mat->col ; col++){
 			dst->element[row][col] = mat->element[row][col]/num;
 		}
 	}
-
 	return dst;
 }
 
@@ -109,13 +108,15 @@ Mat* MatCreate(Mat* mat, int row, int col)
 {
 	int i;
 
-	mat->element = (float**)malloc(row * sizeof(float*));
+	mat->element = (MatType**)malloc(row * sizeof(MatType*));
+
 	if(mat->element == NULL){
 		printf("mat create fail!\n");
 		return NULL;
 	}
+
 	for(i = 0 ; i < row ; i++){
-		mat->element[i] = (float*)malloc(col * sizeof(float));	
+		mat->element[i] = (MatType*)malloc(col * sizeof(MatType));
 		if(mat->element[i] == NULL){
 			int j;
 			printf("mat create fail!\n");
@@ -141,7 +142,7 @@ void MatDelete(Mat* mat)
 	free(mat->element);
 }
 
-Mat* MatSetVal(Mat* mat, float* val)
+Mat* MatSetVal(Mat* mat, MatType* val)
 {
 	int row,col;
 
@@ -251,7 +252,7 @@ Mat* MatMul(Mat* src1, Mat* src2, Mat* dst)
 {
 	int row, col;
 	int i;
-	float temp;
+	MatType temp;
 
 #ifdef MAT_LEGAL_CHECKING
 	if( src1->col != src2->row || src1->row != dst->row || src2->col != dst->col ){
@@ -300,9 +301,9 @@ Mat* MatTrans(Mat* src, Mat* dst)
 }
 
 // return det(mat)
-float MatDet(Mat* mat)
+MatType MatDet(Mat* mat)
 {
-	float det = 0.0f;
+	MatType det = 0.0f;
 	int plarity = 0;
 	int *list;
 	int i;
@@ -335,7 +336,7 @@ Mat* MatAdj(Mat* src, Mat* dst)
 	Mat smat;
 	int row, col;
 	int i,j,r,c;
-	float det;
+	MatType det;
 
 #ifdef MAT_LEGAL_CHECKING
 	if( src->row != src->col || src->row != dst->row || src->col != dst->col){
@@ -379,7 +380,7 @@ Mat* MatAdj(Mat* src, Mat* dst)
 Mat* MatInv(Mat* src, Mat* dst)
 {
 	Mat adj_mat;
-	float det;
+	MatType det;
 	int row, col;
 
 #ifdef MAT_LEGAL_CHECKING

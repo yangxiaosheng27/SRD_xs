@@ -12,6 +12,7 @@
 #include "F2806x_Device.h"      // F2806x Headerfile Include File
 #include "F2806x_Examples.h"   	// F2806x Examples Include File
 #include <stdio.h>
+#include <math.h>
 #include "light_matrix.h"
 
 #ifndef USER_SRD_PROJECT_H_
@@ -36,6 +37,7 @@ extern void Init_SRD(void);
 extern void Control_SRD_internal_loop(void);
 extern void Control_SRD_external_loop(void);
 extern void System_Identification(void);
+extern void Adapt_Control(void);
 
 // for test_control
 extern void SPEED_Control(void);
@@ -127,9 +129,16 @@ extern struct CURRENT_STRUCT		CURRENT;
 extern struct SRM_STRUCT 			SRM;
 extern struct ERROR_STRUCT 			ERROR;
 
-extern float a1,a2,b0,b1;
+#define Parameter_Type double
+extern Parameter_Type u,u_1,u_2,r,y,y_1,y_2,e,e_1,e_2;
+extern Parameter_Type a1,a2,b0,b1,d1,d2;// A*y=(z^-1)*Bu, A=1+a1(z^-1)+a2(z^-2), B=b0+b1(z^-1)
+extern Parameter_Type am1,am2;
+extern Parameter_Type f1,g0,g1,g2,u_adapt;
 
 extern Uint16 alpha[6];
+
+extern int16 Enable_Identification;
+extern int16 Enable_AdaptControl;
 
 extern Uint16 IU_ad;
 extern Uint16 IV_ad;

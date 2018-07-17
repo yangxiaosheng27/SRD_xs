@@ -14,7 +14,7 @@ void My_Init_EQEP(void)
 {
 	InitEQep2Gpio();
 
-    EQep2Regs.QUPRD=90000;         		// Unit Timer for 1kHz at 90 MHz SYSCLKOUT
+    EQep2Regs.QUPRD=90000L-1;         	// Unit Timer for 1kHz at 90 MHz SYSCLKOUT
 
     EQep2Regs.QDECCTL.bit.QSRC=00;      // QEP quadrature count mode
 

@@ -133,7 +133,7 @@ void Get_Hall(void)
 	if(temp_state!=LAST_state && temp_state==last_temp)
 	{
 		count_temp++;
-		if(count_temp>=4)/////////////note!/////////////////////////////////////////////////////////
+		if(count_temp>=3)/////////////note!/////////////////////////////////////////////////////////
 		{
 			count_temp=0;
 			NOW_state = temp_state;
@@ -148,6 +148,7 @@ void Get_Hall(void)
 
 	//get the SRM_Directionection of SRM at the jump time
 	SRM_Direction = NOW_state - LAST_state;
+
 
 	//calculate the SRM_ANGLE
 	if(SRM_Direction)
@@ -165,6 +166,12 @@ void Get_Hall(void)
 	if(PA_state == 0 && PB_state == 0 && PC_state == 0)	SRM_ANGLE = -1;
 	if(SRM_Direction <= -2 || SRM_Direction >= 2)				SRM_ANGLE = -2;
 
+	if(SRM_FIRST_RUN && SRM_Direction)
+	{
+		SRM_FIRST_RUN = 0;
+	}
+
+/*
 	//calculate the SRM_SPEED
 	if(SRM_Direction)
 	{
@@ -196,7 +203,7 @@ void Get_Hall(void)
 
 	if		(SRM_PHASE > 75)		SRM_PHASE = 75;
 	else if	(SRM_PHASE < -75)		SRM_PHASE = -75;
-//	if(!NOW_state%2)	SRM_PHASE += 75;
+//	if(!NOW_state%2)	SRM_PHASE += 75;*/
 }
 
 void Get_Position(void)

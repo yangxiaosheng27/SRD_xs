@@ -37,6 +37,8 @@ user/srd_gpio.obj: D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h
 user/srd_gpio.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h
 user/srd_gpio.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/linkage.h
 user/srd_gpio.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdarg.h
+user/srd_gpio.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/math.h
+user/srd_gpio.obj: D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/_defs.h
 user/srd_gpio.obj: ../user/light_matrix.h
 
 ../user/srd_gpio.c: 
@@ -76,4 +78,6 @@ D:/ti/workspace_v6/SRD_xs/inc/F2806x_DefaultISR.h:
 D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdio.h: 
 D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/linkage.h: 
 D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/stdarg.h: 
+D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/math.h: 
+D:/ti/ccsv6/tools/compiler/ti-cgt-c2000_15.12.1.LTS/include/_defs.h: 
 ../user/light_matrix.h: 

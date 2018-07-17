@@ -12,7 +12,7 @@ void Error_Checking(void);
 
 int16  MAX_SPEED	= 1500;		// 1 means the MAX Speed is 1r/min
 int16  MAX_U		= 1447;		// 1447 means the MAX U is about 350V
-int16  MAX_I		= 250;		// 50 means the MAX I is about 3A
+int16  MAX_I		= 300;		// 50 means the MAX I is about 3A
 
 struct ERROR_STRUCT ERROR;
 

@@ -10,7 +10,7 @@
 main()
 {
 	InitSysCtrl();			// PLL, WatchDog, enable Peripheral Clocks
-    DINT;    				// Disable Interrupts at the CPU level:
+    DINT;    				// Disable Interrupts at the CPU level.
 	InitPieCtrl();			// Initialize the PIE control registers to their default state.
 	IER = 0x0000;			// Disable CPU interrupts
 	IFR = 0x0000;			// clear all CPU interrupt flags
