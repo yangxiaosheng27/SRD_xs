@@ -23,7 +23,7 @@ void IGBT_Control(void);
 int16 Enable_Identification = 0;
 int16 Enable_AdaptControl = 0;
 
-#define SPEED_Expect 		100		// 1000 means 1000	r/min
+#define SPEED_Expect 		500		// 1000 means 1000	r/min
 #define SPEED_MAX			1500		// 1000 means 1000	r/min
 
 /*#define SPEED_Kp 			7
@@ -34,10 +34,10 @@ int16 Enable_AdaptControl = 0;
 #define SPEED_Kd 			0
 #define SPEED_MAX 			1500		// 1500 means 1500r/min
 #define TORQUE_MAX 			2000		// 1000 means 1.000 N*m
-#define TORQUE_Kp			100
-#define TORQUE_Ki			10
-#define TORQUE_Hysteresis	10			// used in Theta_ov
-#define PWM_MAX				1000		// 1000	means 100% duty
+#define TORQUE_Kp			1000
+#define TORQUE_Ki			300
+#define TORQUE_Hysteresis	2			// used in Theta_ov
+#define PWM_MAX				1000		// PWM_MAX	means 100% duty pwm
 #define Theta_ov			20			// 20	means 2 deg
 
 struct LOGIC_STRUCT			LOGIC;
@@ -148,7 +148,7 @@ void My_Init_Control(void)
 	TORQUE_AB.Ki		= TORQUE_Ki;
 	TORQUE_AB.Error		= 0;
 	TORQUE_AB.Integral	= 0;
-	TORQUE_AB.Integral_Max	= PWM_MAX / 2 * 1000L * TORQUE_Ki;
+	TORQUE_AB.Integral_Max	= PWM_MAX / TORQUE_Ki;
 	TORQUE_BC.MAX 		= TORQUE_MAX;
 	TORQUE_BC.Kp		= TORQUE_Kp;
 	TORQUE_BC.Ki		= TORQUE_Ki;
@@ -313,7 +313,7 @@ void TORQUE_Distribution(void)
 {
 	if(SRM_FIRST_RUN)
 	{
-		TORQUE.Expect = 1500;
+		TORQUE.Expect = 500;
 	}
 	if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
 	{
@@ -399,7 +399,7 @@ void TORQUE_Control(void)
 				if(PWM.LAST > PWM.MAX)	PWM.LAST = PWM.MAX;
 				else if(PWM.LAST < 0)	PWM.LAST = 0;
 
-				if(TORQUE_BC.Error >= 0)PWM.COM = 1000;
+				if(TORQUE_BC.Error >= 0)PWM.COM = PWM.MAX;
 				else if(TORQUE_BC.Error < TORQUE.Hysteresis)PWM.COM = 0;
 			}
 			else
@@ -433,7 +433,7 @@ void TORQUE_Control(void)
 				if(PWM.LAST > PWM.MAX)	PWM.LAST = PWM.MAX;
 				else if(PWM.LAST < 0)	PWM.LAST = 0;
 
-				if(TORQUE_AB.Error >= 0)PWM.COM = 1000;
+				if(TORQUE_AB.Error >= 0)PWM.COM = PWM.MAX;
 				else if(TORQUE_AB.Error < TORQUE.Hysteresis)PWM.COM = 0;
 			}
 			else
@@ -467,7 +467,7 @@ void TORQUE_Control(void)
 				if(PWM.LAST > PWM.MAX)	PWM.LAST = PWM.MAX;
 				else if(PWM.LAST < 0)	PWM.LAST = 0;
 
-				if(TORQUE_CA.Error >= 0)PWM.COM = 1000;
+				if(TORQUE_CA.Error >= 0)PWM.COM = PWM.MAX;
 				else if(TORQUE_CA.Error < TORQUE.Hysteresis)PWM.COM = 0;
 			}
 			else
@@ -503,7 +503,7 @@ void IGBT_Control(void)
 				}
 				else
 				{
-					alpha[0] 	= (Uint16)PWM.NOW;
+					alpha[0] 	= (Uint16)PWM.MAX;
 					alpha[1]	= 0;
 					alpha[2] 	= 0;
 					alpha[3]	= (Uint16)PWM.NOW;
@@ -527,7 +527,7 @@ void IGBT_Control(void)
 					alpha[2] 	= 0;
 					alpha[3]	= 0;
 					alpha[4] 	= 0;
-					alpha[5]	= (Uint16)PWM.NOW;
+					alpha[5]	= (Uint16)PWM.MAX;
 				}
 				break;
 	case 2:		if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
@@ -543,7 +543,7 @@ void IGBT_Control(void)
 				{
 					alpha[0] 	= 0;
 					alpha[1]	= 0;
-					alpha[2] 	= (Uint16)PWM.NOW;
+					alpha[2] 	= (Uint16)PWM.MAX;
 					alpha[3]	= 0;
 					alpha[4] 	= 0;
 					alpha[5]	= (Uint16)PWM.NOW;
@@ -561,7 +561,7 @@ void IGBT_Control(void)
 				else
 				{
 					alpha[0] 	= 0;
-					alpha[1]	= (Uint16)PWM.NOW;
+					alpha[1]	= (Uint16)PWM.MAX;
 					alpha[2] 	= (Uint16)PWM.NOW;
 					alpha[3]	 = 0;
 					alpha[4] 	= 0;
@@ -583,7 +583,7 @@ void IGBT_Control(void)
 					alpha[1]	= (Uint16)PWM.NOW;
 					alpha[2] 	= 0;
 					alpha[3]	= 0;
-					alpha[4] 	= (Uint16)PWM.NOW;
+					alpha[4] 	= (Uint16)PWM.MAX;
 					alpha[5]	= 0;
 				}
 				break;
@@ -601,7 +601,7 @@ void IGBT_Control(void)
 					alpha[0] 	= 0;
 					alpha[1]	= 0;
 					alpha[2] 	= 0;
-					alpha[3]	= (Uint16)PWM.NOW;
+					alpha[3]	= (Uint16)PWM.MAX;
 					alpha[4] 	= (Uint16)PWM.NOW;
 					alpha[5]	= 0;
 				}

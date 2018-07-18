@@ -40,11 +40,12 @@ void My_Init_PWM()
 	EDIS;
 }
 
+#define PWM_MAX 1000	// Set timer period (2250 means PWM period = 20kHz, 1000 means 45kHz)
 void InitEPwm1Regs()
 {
    // Setup TBCLK
    EPwm1Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
-   EPwm1Regs.TBPRD = 1000;                    // Set timer period (2250 means PWM period = 20kHz, 1000 means 45kHz)
+   EPwm1Regs.TBPRD = PWM_MAX;                    // Set timer period
    EPwm1Regs.TBCTL.bit.PHSEN = TB_DISABLE;    // Disable phase loading
    EPwm1Regs.TBPHS.half.TBPHS = 0x0000;       // Phase is 0
    EPwm1Regs.TBCTR = 0x0000;                  // Clear counter
@@ -73,7 +74,7 @@ void InitEPwm2Regs()
 {
 	// Setup TBCLK
 	EPwm2Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
-	EPwm2Regs.TBPRD = 1000;                    // Set timer period
+	EPwm2Regs.TBPRD = PWM_MAX;                    // Set timer period
 	EPwm2Regs.TBCTL.bit.PHSEN = TB_DISABLE;    // Disable phase loading
 	EPwm2Regs.TBPHS.half.TBPHS = 0x0000;       // Phase is 0
 	EPwm2Regs.TBCTR = 0x0000;                  // Clear counter
@@ -102,7 +103,7 @@ void InitEPwm3Regs()
 {
 	// Setup TBCLK
 	EPwm3Regs.TBCTL.bit.CTRMODE = TB_COUNT_UP; // Count up
-	EPwm3Regs.TBPRD = 1000;       			   // Set timer period
+	EPwm3Regs.TBPRD = PWM_MAX;       			   // Set timer period
 	EPwm3Regs.TBCTL.bit.PHSEN = TB_DISABLE;    // Disable phase loading
 	EPwm3Regs.TBPHS.half.TBPHS = 0x0000;       // Phase is 0
 	EPwm3Regs.TBCTR = 0x0000;                  // Clear counter

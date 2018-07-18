@@ -16,11 +16,11 @@ void Test_SRD();
 __interrupt void cpu_timer0_isr(void);		// Prototype statements for functions found within this file.
 __interrupt void cpu_timer1_isr(void);		// Prototype statements for functions found within this file.
 
-// SRM.Speed	TORQUE_AB.Expect	CURRENT.Ia_sam
+// SRM.Speed	TORQUE_AB.Expect	CURRENT.Ia_sam	TORQUE_AB.Error	alpha[1-1]
 #define Samp_Data1 TORQUE_AB.Sample
 #define Samp_Data2 alpha[1-1]
-#define Samp_Data3 alpha[4-1]
-#define Samp_Data4 alpha[5-1]
+#define Samp_Data3 SRM.Speed
+#define Samp_Data4 CURRENT.Ia_sam
 //#define Samp_Data1 a1
 //#define Samp_Data2 a2
 //#define Samp_Data3 b0
@@ -65,7 +65,7 @@ __interrupt void cpu_timer1_isr(void)
 }
 
 Uint32 EQEP2_InterruptCount = 0;
-void eqep2_isr(void)
+void eqep2_isr(void)	// 1kHz
 {
 	IER |= M_INT1;                 // Set "global" priority for cputimer0_isr()
 	IER |= M_INT13;                // Set "global" priority for cputimer1_isr()
@@ -94,7 +94,7 @@ void My_Init_Cputimer()
    PieVectTable.TINT1 = &cpu_timer1_isr;
    EDIS;    								// This is needed to disable write to EALLOW protected registers
    InitCpuTimers();   						// For this example, only initialize the Cpu Timers
-   ConfigCpuTimer(&CpuTimer0, 90, 50);		// Configure CPU-Timer0, 90 is CPUFreq(MHz), 20 is Time(uSeconds)
+   ConfigCpuTimer(&CpuTimer0, 90, 50);		// Configure CPU-Timer0, 90 is CPUFreq(MHz), 50 is Time(uSeconds)
    ConfigCpuTimer(&CpuTimer1, 90, 1000);	// Configure CPU-Timer1, 90 is CPUFreq(MHz), 1000 is Time(uSeconds)
    IER |= M_INT1;							// Enable CPU int1 which is connected to CPU-Timer 0
    IER |= M_INT13;							// Enable CPU int13 which is connected to CPU-Timer 1
