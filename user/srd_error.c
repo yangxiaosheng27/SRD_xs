@@ -38,7 +38,7 @@ void Error_Checking(void)
 	if(Ref3V_ad<(Ref3V_offset-150)||Ref3V_ad>(Ref3V_offset+150))				ERROR.Code |= 0x0080;
 	if(ERROR.CPU_Timer0_Remain < 0x0010)										ERROR.Code |= 0x0100;
 	if(SRM.Position>=2048*4)									ERROR.Code |= 0x0200;
-	if(SRM.Speed<0)																ERROR.Code |= 0x0400;
+	if(SRM.Speed<-10)															ERROR.Code |= 0x0400;
 	if(SRM.Speed>MAX_SPEED||SRM.Speed<-MAX_SPEED)								ERROR.Code |= 0x0800;
 	if(EPwm1Regs.CMPA.half.CMPA*EPwm1Regs.CMPB||EPwm2Regs.CMPA.half.CMPA*EPwm2Regs.CMPB||EPwm3Regs.CMPA.half.CMPA*EPwm3Regs.CMPB)
 																				ERROR.Code |= 0x1000;

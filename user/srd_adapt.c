@@ -50,13 +50,6 @@ void System_Identification(void)
 	u = TORQUE.Expect;
 	y = SRM.Speed;
 
-/*	//for test
-  	u+=1;
-	count+=1;
-	if(count>1000)while(1);
-	if(u>10)u=5;
-	y=1.81*y_1-0.8187*y_2+0.004377*u_1+0.004679*u_2;*/
-
 	// update fai_now
 	fai_element[0] = -y_1;
 	fai_element[1] = -y_2;
@@ -125,11 +118,6 @@ void System_Identification(void)
 	b1 = **(theta_now.element+3);
 	d1 = **(theta_now.element+4);
 	d2 = **(theta_now.element+5);
-
-	a1 = -1.848;
-	a2 = 0.856;
-	b0 = 0.0298;
-	b1 = -0.0238;
 
 }
 

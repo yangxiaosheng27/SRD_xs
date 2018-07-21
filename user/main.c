@@ -21,7 +21,7 @@ main()
 
 	while(1)
 	{
-							//Control_SRD() will run in cpu_timer0_isr() and eqep2_isr()
+							//Control_SRD() will run in cpu_timer0_isr()
 	}
 }
 //===========================================================================

@@ -90,7 +90,7 @@ void Get_State(void)
 void Get_Current(void)
 {
 	CURRENT.Ia_sam = ((int16)IU_ad - (int16)IU_offset) * CURRENT_Coefficient ;
-	CURRENT.Ib_sam = ((int16)IV_ad - (int16)IU_offset) * CURRENT_Coefficient ;
+	CURRENT.Ib_sam = ((int16)IV_ad - (int16)IV_offset) * CURRENT_Coefficient ;
 	CURRENT.Ic_sam = - CURRENT.Ia_sam - CURRENT.Ib_sam;
 
 	CURRENT.Ia = CURRENT.Ia_1 * Filter_Coefficient1 + CURRENT.Ia_sam * Filter_Coefficient2 + CURRENT.Ia_sam_1 * Filter_Coefficient3;
@@ -103,13 +103,13 @@ void Get_Current(void)
 	CURRENT.Ib_sam_1 = CURRENT.Ib_sam;
 	CURRENT.Ic_sam_1 = CURRENT.Ic_sam;
 
-	CURRENT.Ia_abs = CURRENT.Ia>0?CURRENT.Ia:-CURRENT.Ia;
+/*	CURRENT.Ia_abs = CURRENT.Ia>0?CURRENT.Ia:-CURRENT.Ia;
 	CURRENT.Ib_abs = CURRENT.Ib>0?CURRENT.Ib:-CURRENT.Ib;
-	CURRENT.Ic_abs = CURRENT.Ic>0?CURRENT.Ic:-CURRENT.Ic;
+	CURRENT.Ic_abs = CURRENT.Ic>0?CURRENT.Ic:-CURRENT.Ic;*/
 
-/*	CURRENT.Ia_abs = CURRENT.Ia_sam>0?CURRENT.Ia_sam:-CURRENT.Ia_sam;
+	CURRENT.Ia_abs = CURRENT.Ia_sam>0?CURRENT.Ia_sam:-CURRENT.Ia_sam;
 	CURRENT.Ib_abs = CURRENT.Ib_sam>0?CURRENT.Ib_sam:-CURRENT.Ib_sam;
-	CURRENT.Ic_abs = CURRENT.Ic_sam>0?CURRENT.Ic_sam:-CURRENT.Ic_sam;*/
+	CURRENT.Ic_abs = CURRENT.Ic_sam>0?CURRENT.Ic_sam:-CURRENT.Ic_sam;
 }
 
 void Get_Hall(void)

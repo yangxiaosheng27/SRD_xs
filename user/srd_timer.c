@@ -7,6 +7,23 @@
  */
 #include "SRD_Project.h"        			// User's Funtions
 
+// SRM.Speed	TORQUE_AB.Expect	CURRENT.Ia_sam	TORQUE_AB.Error	alpha[1-1]
+#define Samp_Data1 CURRENT.Ia_sam
+#define Samp_Data2 SRM.Speed
+#define Samp_Data3 TORQUE.Sample
+//#define Samp_Data4 alpha[1-1]
+//#define Samp_Data1 a1
+//#define Samp_Data2 a2
+//#define Samp_Data3 b0
+//#define Samp_Data4 b1
+
+#define Data_Length1 7000
+#define Data_Length2 1000
+#define Data_Length3 1000
+#define Data_Length4 0
+#define Data_Type int16
+//#define Sample_Loop
+
 void My_Init_Cputimer();
 void Sample1();
 void Sample2();
@@ -16,20 +33,6 @@ void Test_SRD();
 __interrupt void cpu_timer0_isr(void);		// Prototype statements for functions found within this file.
 __interrupt void cpu_timer1_isr(void);		// Prototype statements for functions found within this file.
 
-// SRM.Speed	TORQUE_AB.Expect	CURRENT.Ia_sam	TORQUE_AB.Error	alpha[1-1]
-#define Samp_Data1 TORQUE_AB.Sample
-#define Samp_Data2 alpha[1-1]
-#define Samp_Data3 SRM.Speed
-#define Samp_Data4 CURRENT.Ia_sam
-//#define Samp_Data1 a1
-//#define Samp_Data2 a2
-//#define Samp_Data3 b0
-//#define Samp_Data4 b1
-
-#define Data_Length 3000
-#define Data_Type int16
-#define Sample_Loop
-
 __interrupt void cpu_timer0_isr(void)
 {
 	CpuTimer0.InterruptCount++;
@@ -38,10 +41,11 @@ __interrupt void cpu_timer0_isr(void)
 
 	Control_SRD_internal_loop();
 //	Test_SRD();		//for test
-	Sample1();
+/*	Sample1();
 	Sample2();
 	Sample3();
-	Sample4();
+	Sample4();*/
+	Sample1();
 
 	// Acknowledge this interrupt to receive more interrupts from group 1
 	PieCtrlRegs.PIEACK.all = PIEACK_GROUP1;
@@ -58,10 +62,8 @@ __interrupt void cpu_timer1_isr(void)
 	if(CpuTimer1.InterruptCount>=3000)Enable_AdaptControl=1;
 	if(CpuTimer1.InterruptCount>=1000000)CpuTimer1.InterruptCount = 0;
 
-/*	if(Enable_AdaptControl)
-	{
-		SPEED.Expect = 500;
-	}*/
+	Sample2();
+	Sample3();
 }
 
 Uint32 EQEP2_InterruptCount = 0;
@@ -105,22 +107,22 @@ void My_Init_Cputimer()
 
 #ifdef Samp_Data1
 #pragma DATA_SECTION(SampData1,"SampData1");
-volatile Data_Type SampData1[Data_Length]={0};
+volatile Data_Type SampData1[Data_Length1]={0};
 #endif
 
 #ifdef Samp_Data2
 #pragma DATA_SECTION(SampData2,"SampData2");
-volatile Data_Type SampData2[Data_Length]={0};
+volatile Data_Type SampData2[Data_Length2]={0};
 #endif
 
 #ifdef Samp_Data3
 #pragma DATA_SECTION(SampData3,"SampData3");
-volatile Data_Type SampData3[Data_Length]={0};
+volatile Data_Type SampData3[Data_Length3]={0};
 #endif
 
 #ifdef Samp_Data4
 #pragma DATA_SECTION(SampData4,"SampData4");
-volatile Data_Type SampData4[Data_Length]={0};
+volatile Data_Type SampData4[Data_Length4]={0};
 #endif
 
 void Sample1()
@@ -128,12 +130,12 @@ void Sample1()
 #ifdef Samp_Data1
 	static int16 Samp_count = 0;
 #ifdef Sample_Loop
-	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
+	if(Samp_count>Data_Length1)	Samp_count -= Data_Length;
 #endif
 #endif
 
 #ifdef Samp_Data1
-	if(Samp_count<=Data_Length)
+	if(Samp_count<=Data_Length1)
 	{
 		Samp_count++;
 		SampData1[Samp_count] = Samp_Data1;
@@ -145,12 +147,12 @@ void Sample2()
 #ifdef Samp_Data2
 	static int16 Samp_count = 0;
 #ifdef Sample_Loop
-	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
+	if(Samp_count>Data_Length2)	Samp_count -= Data_Length;
 #endif
 #endif
 
 #ifdef Samp_Data2
-	if(Samp_count<=Data_Length)
+	if(Samp_count<=Data_Length2)
 	{
 		Samp_count++;
 		SampData2[Samp_count] = Samp_Data2;
@@ -162,12 +164,12 @@ void Sample3()
 #ifdef Samp_Data3
 	static int16 Samp_count = 0;
 #ifdef Sample_Loop
-	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
+	if(Samp_count>Data_Length3)	Samp_count -= Data_Length;
 #endif
 #endif
 
 #ifdef Samp_Data3
-	if(Samp_count<=Data_Length)
+	if(Samp_count<=Data_Length3)
 	{
 		Samp_count++;
 		SampData3[Samp_count] = Samp_Data3;
@@ -180,12 +182,12 @@ void Sample4()
 #ifdef Samp_Data4
 	static int16 Samp_count = 0;
 #ifdef Sample_Loop
-	if(Samp_count>Data_Length)	Samp_count -= Data_Length;
+	if(Samp_count>Data_Length4)	Samp_count -= Data_Length;
 #endif
 #endif
 
 #ifdef Samp_Data4
-	if(Samp_count<=Data_Length)
+	if(Samp_count<=Data_Length4)
 	{
 		Samp_count++;
 		SampData4[Samp_count] = Samp_Data4;
@@ -193,7 +195,7 @@ void Sample4()
 #endif
 }
 
-void Test_SRD()
+/*void Test_SRD()
 {
 //	SRM_FIRST_RUN = 0;
 	LOGIC.State = 0;
@@ -207,7 +209,7 @@ void Test_SRD()
 	SRM.Speed =	1;
 	Error_Checking();
 	IGBT_Control();
-}
+}*/
 
 //===========================================================================
 // No more.

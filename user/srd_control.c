@@ -2,7 +2,7 @@
  * 	FileName:	srd_control.c
  * 	Project:	SRD_xs
  *
- *  Created on: 2018/3/26
+ *  Created on: 2018/7/18
  *  Author: 	yangxiaosheng
  */
 #include "SRD_Project.h"        // User's Funtions
@@ -23,22 +23,18 @@ void IGBT_Control(void);
 int16 Enable_Identification = 0;
 int16 Enable_AdaptControl = 0;
 
-#define SPEED_Expect 		500		// 1000 means 1000	r/min
+#define SPEED_Expect 		1000			// 1000 means 1000	r/min
 #define SPEED_MAX			1500		// 1000 means 1000	r/min
-
-/*#define SPEED_Kp 			7
-#define SPEED_Ki			0.03*/
 #define SPEED_Kp 			3
 #define SPEED_Ki			0.015
-
 #define SPEED_Kd 			0
 #define SPEED_MAX 			1500		// 1500 means 1500r/min
-#define TORQUE_MAX 			2000		// 1000 means 1.000 N*m
-#define TORQUE_Kp			1000
-#define TORQUE_Ki			300
-#define TORQUE_Hysteresis	2			// used in Theta_ov
+#define TORQUE_MAX 			600			// 500 means 5A
+#define TORQUE_Kp			300
+#define TORQUE_Ki			10
+#define TORQUE_Hysteresis	30			// used in Theta_ov
 #define PWM_MAX				1000		// PWM_MAX	means 100% duty pwm
-#define Theta_ov			20			// 20	means 2 deg
+#define Theta_ov			10			// 10	means 1 deg
 
 struct LOGIC_STRUCT			LOGIC;
 struct SPEED_STRUCT 		SPEED;
@@ -72,8 +68,10 @@ void SPEED_Control(void)
 
 //	if(Enable_AdaptControl)	TORQUE.Expect = u_adapt;
 
-	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect= TORQUE.MAX;
-	else if(TORQUE.Expect<0) TORQUE.Expect= 0;
+	if(TORQUE.Expect > TORQUE.MAX) TORQUE.Expect = TORQUE.MAX;
+	else if(TORQUE.Expect<0) TORQUE.Expect = 0;
+
+//	TORQUE.Expect = 50;
 }
 
 void Init_SRD(void)
@@ -139,7 +137,7 @@ void My_Init_Control(void)
 	SPEED.Ki 			= SPEED_Ki;
 	SPEED.Kd 			= SPEED_Kd;
 	SPEED.Integral		= 0;
-	SPEED.Integral_Max	= TORQUE_MAX*100L;	// not use
+	SPEED.Integral_Max	= TORQUE_MAX*10L;	// not use
 	SPEED.Error			= 0;
 	TORQUE.MAX 			= TORQUE_MAX;
 	TORQUE.Hysteresis	= TORQUE_Hysteresis;
@@ -148,19 +146,19 @@ void My_Init_Control(void)
 	TORQUE_AB.Ki		= TORQUE_Ki;
 	TORQUE_AB.Error		= 0;
 	TORQUE_AB.Integral	= 0;
-	TORQUE_AB.Integral_Max	= PWM_MAX / TORQUE_Ki;
+	TORQUE_AB.Integral_Max	= PWM_MAX*100L / TORQUE_Ki;
 	TORQUE_BC.MAX 		= TORQUE_MAX;
 	TORQUE_BC.Kp		= TORQUE_Kp;
 	TORQUE_BC.Ki		= TORQUE_Ki;
 	TORQUE_BC.Error		= 0;
 	TORQUE_BC.Integral	= 0;
-	TORQUE_BC.Integral_Max	= PWM_MAX / TORQUE_Ki;
+	TORQUE_BC.Integral_Max	= PWM_MAX*100L / TORQUE_Ki;
 	TORQUE_CA.MAX 		= TORQUE_MAX;
 	TORQUE_CA.Kp		= TORQUE_Kp;
 	TORQUE_CA.Ki		= TORQUE_Ki;
 	TORQUE_CA.Error		= 0;
 	TORQUE_CA.Integral	= 0;
-	TORQUE_CA.Integral_Max	= PWM_MAX / TORQUE_Ki;
+	TORQUE_CA.Integral_Max	= PWM_MAX*100L / TORQUE_Ki;
 }
 
 void LOGIC_Control(void)
@@ -214,108 +212,40 @@ void LOGIC_Control(void)
 	else								LOGIC.Turn = 1;
 }
 
-int32 TORQUE_Model[6][30]={
-		{   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{  60,   65,   90,   80,   80,  100,  100,   80,  120,  150,  120,  100,  110,   90,   40,   20,   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{ 260,  300,  365,  365,  370,  390,  380,  385,  410,  510,  410,  410,  430,  440,  210,   60,   40,   20,   10,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{ 620,  730,  830,  850,  870,  880,  880,  890,  890,  980,  910,  920,  975,  830,  420,  170,  130,   70,   50,   20,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{1210, 1370, 1470, 1500, 1520, 1540, 1530, 1560, 1550, 1580, 1530, 1560, 1660, 1690,  670,  340,  240,  160,  120,   50,   20,    0,    0,    0,    0,    0,    0,    0,    0,    0},
-		{1810, 1990, 2200, 2280, 2360, 2370, 2350, 2370, 2330, 2350, 2320, 2280, 2340, 2470, 1980,  900,  500,  280,  220,  110,   40,    0,    0,    0,    0,    0,    0,    0,    0,    0}
-};
-#define GET_TORQUE ((TORQUE_Model[I_index+1][theta_index+1]*theta_ratio + TORQUE_Model[I_index+1][theta_index]*(100-theta_ratio))*I_ratio + (TORQUE_Model[I_index][theta_index+1]*theta_ratio + TORQUE_Model[I_index][theta_index]*(100-theta_ratio))*(100-I_ratio))/10000
-#define GET_TORQUE_MAX TORQUE_Model[5][theta_index+1]*theta_ratio/10*(I_abs*I_abs/1000)/25/100 + TORQUE_Model[5][theta_index]*(100-theta_ratio)/10*(I_abs*I_abs/1000)/25/100
 void TORQUE_Calculate(void)
 {
-	int32 I_index,I_ratio,theta_index,theta_ratio,I_abs;
-	int32 Ia_abs;
-	int32 Ib_abs;
-	int32 Ic_abs;
-	// for test!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	static int32 TORQUE_AB_MAX=0,Ia_max=0;
-	//for test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	Ia_abs = CURRENT.Ia_abs;
-	Ib_abs = CURRENT.Ib_abs;
-	Ic_abs = CURRENT.Ic_abs;
-
 	switch(LOGIC.State)
 	{
 	case  0:
-	case  3:	theta_index 		= SRM.Phase/10;
-				theta_ratio 		= SRM.Phase%10*10;			// 1 means 1%
-				I_index 			= Ia_abs/100;
-				I_ratio 			= Ia_abs%100;			// 1 means 1%
-				I_abs				= Ia_abs;
-				if(I_abs>=500)
-					TORQUE_AB.Sample = GET_TORQUE_MAX;
-				else
-					TORQUE_AB.Sample = GET_TORQUE;
-				theta_index			= SRM.Phase/10 + 15;
-				I_index 			= Ic_abs/100;
-				I_ratio 			= Ic_abs%100;			// 1 means 1%
-				I_abs				= Ic_abs;
-				if(I_abs>=500)
-					TORQUE_BC.Sample = GET_TORQUE_MAX;
-				else
-					TORQUE_BC.Sample = GET_TORQUE;
+	case  3:	TORQUE_AB.Sample 	= CURRENT.Ia_abs;
+				TORQUE_BC.Sample 	= CURRENT.Ic_abs;
 				TORQUE_CA.Sample 	= 0;
+				TORQUE.Sample		= TORQUE_AB.Sample;
 				break;
 	case  1:
-	case  4:	theta_index 		= SRM.Phase/10 + 15;
-				theta_ratio 		= SRM.Phase%10*10;			// 1 means 1%
-				I_index 			= Ib_abs/100;
-				I_ratio 			= Ib_abs%100;			// 1 means 1%
-				I_abs				= Ib_abs;
-				if(I_abs>=500)
-					TORQUE_AB.Sample = GET_TORQUE_MAX;
-				else
-					TORQUE_AB.Sample = GET_TORQUE;
+	case  4:	TORQUE_AB.Sample 	= CURRENT.Ib_abs;
 				TORQUE_BC.Sample 	= 0;
-				theta_index 		= SRM.Phase/10;
-				I_index 			= Ic_abs/100;
-				I_ratio 			= Ic_abs%100;			// 1 means 1%
-				I_abs				= Ic_abs;
-				if(I_abs>=500)
-					TORQUE_CA.Sample = GET_TORQUE_MAX;
-				else
-					TORQUE_CA.Sample = GET_TORQUE;
+				TORQUE_CA.Sample 	= CURRENT.Ic_abs;
+				TORQUE.Sample		= TORQUE_CA.Sample;
 				break;
 	case  2:
 	case  5:	TORQUE_AB.Sample 	= 0;
-				theta_index 		= SRM.Phase/10;
-				theta_ratio 		= SRM.Phase%10*10;			// 1 means 1%
-				I_index 			= Ib_abs/100;
-				I_ratio 			= Ib_abs%100;			// 1 means 1%
-				I_abs				= Ib_abs;
-				if(I_abs>=500)
-					TORQUE_BC.Sample = GET_TORQUE_MAX;
-				else
-					TORQUE_BC.Sample = GET_TORQUE;
-				theta_index 		= SRM.Phase/10 + 15;
-				I_index 			= Ia_abs/100;
-				I_ratio 			= Ia_abs%100;			// 1 means 1%
-				I_abs				= Ia_abs;
-				if(I_abs>=500)
-					TORQUE_CA.Sample = GET_TORQUE_MAX;
-				else
-					TORQUE_CA.Sample = GET_TORQUE;
+				TORQUE_BC.Sample 	= CURRENT.Ib_abs;
+				TORQUE_CA.Sample 	= CURRENT.Ia_abs;
+				TORQUE.Sample		= TORQUE_BC.Sample;
 				break;
 	default:	DRV_UP;
 	}
-
-	//for test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if(TORQUE_AB.Sample>TORQUE_AB_MAX)TORQUE_AB_MAX=TORQUE_AB.Sample;
-	if(Ia_abs>Ia_max)Ia_max=Ia_abs;
-	//for test!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	TORQUE.Sample = (TORQUE.Sample-TORQUE.Expect)*0.3+TORQUE.Expect;
 }
 
 void TORQUE_Distribution(void)
 {
 	if(SRM_FIRST_RUN)
 	{
-		TORQUE.Expect = 500;
+		TORQUE.Expect = TORQUE.MAX;
 	}
-	if(SRM.Phase<=Theta_ov&&!SRM_FIRST_RUN)
+	if(SRM.Phase<=Theta_ov && !SRM_FIRST_RUN)
 	{
 		TORQUE.NEXT = TORQUE.Expect*SRM.Phase/Theta_ov;
 		TORQUE.LAST = TORQUE.Expect-TORQUE.NEXT;
@@ -611,7 +541,7 @@ void IGBT_Control(void)
 	if(alpha[0] && alpha[1] || alpha[2] && alpha[3] || alpha[4] && alpha[5])
 	{
 		DRV_UP;
-		while(1);	// error!
+		while(1);	// danger! stop control singal!
 	}
 	else
 	{
