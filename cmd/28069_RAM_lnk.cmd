@@ -72,6 +72,8 @@
          if required to create a larger memory block.
 */
 
+-heap 0x001000 //for too much malloc()
+
 MEMORY
 {
 PAGE 0 :
@@ -79,7 +81,7 @@ PAGE 0 :
 
    BEGIN       : origin = 0x000000, length = 0x000002
    RAMM0       : origin = 0x000050, length = 0x0003B0
-   RAML0_L3    : origin = 0x008000, length = 0x002000	 /* RAML0-3 combined for size of .text */
+   RAML0_L5    : origin = 0x008000, length = 0x006000	 /* RAML0-5 combined for size of .text */
    														 /* in Example_F2806xSWPrioritezedInterrupts */
    RESET       : origin = 0x3FFFC0, length = 0x000002
    FPUTABLES   : origin = 0x3FD860, length = 0x0006A0	 /* FPU Tables in Boot ROM */
@@ -87,18 +89,13 @@ PAGE 0 :
    IQTABLES2   : origin = 0x3FEA50, length = 0x00008C    /* IQ Math Tables in Boot ROM */
    IQTABLES3   : origin = 0x3FEADC, length = 0x0000AA	 /* IQ Math Tables in Boot ROM */
 
-   BOOTROM    : origin = 0x3FF3B0, length = 0x000C10
+   BOOTROM     : origin = 0x3FF3B0, length = 0x000C10
 
 
 PAGE 1 :
-
    BOOT_RSVD   : origin = 0x000002, length = 0x00004E     /* Part of M0, BOOT rom will use this for stack */
    RAMM1       : origin = 0x000400, length = 0x000400     /* on-chip RAM block M1 */
-   RAML4       : origin = 0x00A000, length = 0x002000     /* on-chip RAM block L4 */
-   RAML5       : origin = 0x00C000, length = 0x002000     /* on-chip RAM block L5 */
-   RAML6       : origin = 0x00E000, length = 0x002000     /* on-chip RAM block L6 */
-   RAML7       : origin = 0x010000, length = 0x002000     /* on-chip RAM block L7 */
-   RAML8       : origin = 0x012000, length = 0x002000     /* on-chip RAM block L8 */
+   RAML6_8     : origin = 0x00E000, length = 0x006000     /* on-chip RAM block L6-8 */
    USB_RAM     : origin = 0x040000, length = 0x000800     /* USB RAM		  */
 }
 
@@ -117,27 +114,29 @@ SECTIONS
    #endif
 #endif 
    
-   .text            : > RAML0_L3,   PAGE = 0	
+   .text            : > RAML0_L5,   PAGE = 0
    .cinit           : > RAMM0,      PAGE = 0
    .pinit           : > RAMM0,      PAGE = 0
    .switch          : > RAMM0,      PAGE = 0
    .reset           : > RESET,      PAGE = 0, TYPE = DSECT /* not used, */
 
    .stack           : > RAMM1,      PAGE = 1
-   .ebss            : > RAML4,      PAGE = 1
-   .econst          : > RAML4,      PAGE = 1
-   .esysmem         : > RAML4,      PAGE = 1
+   .esysmem         : > RAML6_8,  	PAGE = 1
+   .ebss            : > RAML6_8,    PAGE = 1
+   .econst          : > RAML6_8,    PAGE = 1
+   .cio             : > RAML6_8,    PAGE = 1	// for printf or scanf
 
-   IQmath           : > RAML0_L3,   PAGE = 0
+   IQmath           : > RAML0_L5,   PAGE = 0
    IQmathTables     : > IQTABLES,   PAGE = 0, TYPE = NOLOAD
    
    /* Allocate FPU math areas: */
    FPUmathTables    : > FPUTABLES,  PAGE = 0, TYPE = NOLOAD
    
-   DMARAML5	        : > RAML5,      PAGE = 1
-   DMARAML6	        : > RAML6,      PAGE = 1
-   DMARAML7	        : > RAML7,      PAGE = 1
-   DMARAML8	        : > RAML8,      PAGE = 1   
+   SampData1        : > RAML6_8,    PAGE = 1
+   SampData2        : > RAML6_8,    PAGE = 1
+   SampData3        : > RAML6_8,    PAGE = 1
+   SampData4        : > RAML6_8,    PAGE = 1
+
 
   /* Uncomment the section below if calling the IQNexp() or IQexp()
       functions from the IQMath.lib library in order to utilize the

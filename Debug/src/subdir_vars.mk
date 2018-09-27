@@ -2,6 +2,8 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
+SHELL = cmd.exe
+
 # Add inputs and outputs from these tool invocations to the build variables 
 ASM_SRCS += \
 ../src/F2806x_CodeStartBranch.asm \
@@ -31,6 +33,29 @@ C_SRCS += \
 ../src/F2806x_Spi.c \
 ../src/F2806x_SysCtrl.c \
 ../src/F2806x_TempSensorConv.c 
+
+C_DEPS += \
+./src/F2806x_Adc.d \
+./src/F2806x_Comp.d \
+./src/F2806x_CpuTimers.d \
+./src/F2806x_DefaultIsr.d \
+./src/F2806x_Dma.d \
+./src/F2806x_ECan.d \
+./src/F2806x_ECap.d \
+./src/F2806x_EPwm.d \
+./src/F2806x_EQep.d \
+./src/F2806x_GlobalVariableDefs.d \
+./src/F2806x_Gpio.d \
+./src/F2806x_HRCap.d \
+./src/F2806x_I2C.d \
+./src/F2806x_Mcbsp.d \
+./src/F2806x_OscComp.d \
+./src/F2806x_PieCtrl.d \
+./src/F2806x_PieVect.d \
+./src/F2806x_Sci.d \
+./src/F2806x_Spi.d \
+./src/F2806x_SysCtrl.d \
+./src/F2806x_TempSensorConv.d 
 
 OBJS += \
 ./src/F2806x_Adc.obj \
@@ -65,52 +90,6 @@ ASM_DEPS += \
 ./src/F2806x_DisInt.d \
 ./src/F2806x_usDelay.d 
 
-C_DEPS += \
-./src/F2806x_Adc.d \
-./src/F2806x_Comp.d \
-./src/F2806x_CpuTimers.d \
-./src/F2806x_DefaultIsr.d \
-./src/F2806x_Dma.d \
-./src/F2806x_ECan.d \
-./src/F2806x_ECap.d \
-./src/F2806x_EPwm.d \
-./src/F2806x_EQep.d \
-./src/F2806x_GlobalVariableDefs.d \
-./src/F2806x_Gpio.d \
-./src/F2806x_HRCap.d \
-./src/F2806x_I2C.d \
-./src/F2806x_Mcbsp.d \
-./src/F2806x_OscComp.d \
-./src/F2806x_PieCtrl.d \
-./src/F2806x_PieVect.d \
-./src/F2806x_Sci.d \
-./src/F2806x_Spi.d \
-./src/F2806x_SysCtrl.d \
-./src/F2806x_TempSensorConv.d 
-
-C_DEPS__QUOTED += \
-"src\F2806x_Adc.d" \
-"src\F2806x_Comp.d" \
-"src\F2806x_CpuTimers.d" \
-"src\F2806x_DefaultIsr.d" \
-"src\F2806x_Dma.d" \
-"src\F2806x_ECan.d" \
-"src\F2806x_ECap.d" \
-"src\F2806x_EPwm.d" \
-"src\F2806x_EQep.d" \
-"src\F2806x_GlobalVariableDefs.d" \
-"src\F2806x_Gpio.d" \
-"src\F2806x_HRCap.d" \
-"src\F2806x_I2C.d" \
-"src\F2806x_Mcbsp.d" \
-"src\F2806x_OscComp.d" \
-"src\F2806x_PieCtrl.d" \
-"src\F2806x_PieVect.d" \
-"src\F2806x_Sci.d" \
-"src\F2806x_Spi.d" \
-"src\F2806x_SysCtrl.d" \
-"src\F2806x_TempSensorConv.d" 
-
 OBJS__QUOTED += \
 "src\F2806x_Adc.obj" \
 "src\F2806x_CodeStartBranch.obj" \
@@ -137,6 +116,29 @@ OBJS__QUOTED += \
 "src\F2806x_SysCtrl.obj" \
 "src\F2806x_TempSensorConv.obj" \
 "src\F2806x_usDelay.obj" 
+
+C_DEPS__QUOTED += \
+"src\F2806x_Adc.d" \
+"src\F2806x_Comp.d" \
+"src\F2806x_CpuTimers.d" \
+"src\F2806x_DefaultIsr.d" \
+"src\F2806x_Dma.d" \
+"src\F2806x_ECan.d" \
+"src\F2806x_ECap.d" \
+"src\F2806x_EPwm.d" \
+"src\F2806x_EQep.d" \
+"src\F2806x_GlobalVariableDefs.d" \
+"src\F2806x_Gpio.d" \
+"src\F2806x_HRCap.d" \
+"src\F2806x_I2C.d" \
+"src\F2806x_Mcbsp.d" \
+"src\F2806x_OscComp.d" \
+"src\F2806x_PieCtrl.d" \
+"src\F2806x_PieVect.d" \
+"src\F2806x_Sci.d" \
+"src\F2806x_Spi.d" \
+"src\F2806x_SysCtrl.d" \
+"src\F2806x_TempSensorConv.d" 
 
 ASM_DEPS__QUOTED += \
 "src\F2806x_CodeStartBranch.d" \

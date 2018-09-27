@@ -2,6 +2,8 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
+SHELL = cmd.exe
+
 # Add inputs and outputs from these tool invocations to the build variables 
 LIB_SRCS += \
 ../lib/2806x_BootROM_API_TABLE_Symbols.lib \

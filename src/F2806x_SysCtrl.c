@@ -305,9 +305,9 @@ void InitPeripheralClocks(void)
 //
 // This function is not written to be an example of efficient code.
 
-   SysCtrlRegs.PCLKCR1.bit.EPWM1ENCLK = 0;    // ePWM1
-   SysCtrlRegs.PCLKCR1.bit.EPWM2ENCLK = 0;    // ePWM2
-   SysCtrlRegs.PCLKCR1.bit.EPWM3ENCLK = 0;    // ePWM3
+   SysCtrlRegs.PCLKCR1.bit.EPWM1ENCLK = 1;    // ePWM1
+   SysCtrlRegs.PCLKCR1.bit.EPWM2ENCLK = 1;    // ePWM2
+   SysCtrlRegs.PCLKCR1.bit.EPWM3ENCLK = 1;    // ePWM3
    SysCtrlRegs.PCLKCR1.bit.EPWM4ENCLK = 0;    // ePWM4
    SysCtrlRegs.PCLKCR1.bit.EPWM5ENCLK = 0;    // ePWM5
    SysCtrlRegs.PCLKCR1.bit.EPWM6ENCLK = 0;    // ePWM6
@@ -318,7 +318,7 @@ void InitPeripheralClocks(void)
    SysCtrlRegs.PCLKCR0.bit.TBCLKSYNC  = 0;    // Enable TBCLK within the ePWM
 
    SysCtrlRegs.PCLKCR1.bit.EQEP1ENCLK = 0;    // eQEP1
-   SysCtrlRegs.PCLKCR1.bit.EQEP2ENCLK = 0;    // eQEP2
+   SysCtrlRegs.PCLKCR1.bit.EQEP2ENCLK = 1;    // eQEP2
 
    SysCtrlRegs.PCLKCR1.bit.ECAP1ENCLK = 0;    // eCAP1
    SysCtrlRegs.PCLKCR1.bit.ECAP2ENCLK = 0;    // eCAP2

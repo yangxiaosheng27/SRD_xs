@@ -1,24 +1,23 @@
 /*
- * 	FileName:	srd_adc.c
- * 	Project:	SRD_xs
+ * 	FileName:	srm_adc.c
+ * 	Project:	SRM
  *
- *  Created on: 2018/1/16
+ *  Created on: 2018/3/26
  *  Author: 	yangxiaosheng
  */
-#include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
-#include "SRD_Project.h"        // User's Funtions
+#include "SRM_Project.h"        // User's Funtions
 #define ADC_usDELAY  1000L
 
-void my_init_adc();
-void get_AD_offset(void);
-void my_AdcChanSelect(Uint16 ch_no);	//be used in get_AD_offset(void);
-Uint16 my_AdcConversion(void);			//be used in get_AD_offset(void);
+void My_Init_ADC();
+void Get_AD_Offset(void);
+void My_AdcChanSelect(Uint16 ch_no);	//be used in get_AD_offset(void);
+Uint16 My_AdcConversion(void);			//be used in get_AD_offset(void);
 
-void my_init_adc()
+void My_Init_ADC()
 {
     InitAdc();
     AdcOffsetSelfCal();
-	get_AD_offset();
+	Get_AD_Offset();
 
 // Configure ADC
 	EALLOW;
@@ -86,21 +85,21 @@ void my_init_adc()
 }
 
 
-void get_AD_offset(void)
+void Get_AD_Offset(void)
 {
     EALLOW;
-    my_AdcChanSelect(7);                                //Select ADCINA7(IU) for all SOC
-    IU_ad = IU_offset = my_AdcConversion();                     //Capture ADC conversion on ADCINA7(IU)
-    my_AdcChanSelect(9);                                //Select ADCINB1(IV) for all SOC
-    IV_ad = IV_offset = my_AdcConversion();                     //Capture ADC conversion on ADCINB1(IV)
-    my_AdcChanSelect(2);                                //Select ADCINA2(DBVD) for all SOC
-    DBVD_ad = DBVD_offset = my_AdcConversion();                   //Capture ADC conversion on ADCINA2(DBVD)
-    my_AdcChanSelect(10);                               //Select ADCINB2(Ref3V) for all SOC
-    Ref3V_ad = Ref3V_offset = my_AdcConversion();                  //Capture ADC conversion on ADCINB2(Ref3V)
+    My_AdcChanSelect(7);                                //Select ADCINA7(IU) for all SOC
+    IU_ad = IU_offset = My_AdcConversion();                     //Capture ADC conversion on ADCINA7(IU)
+    My_AdcChanSelect(9);                                //Select ADCINB1(IV) for all SOC
+    IV_ad = IV_offset = My_AdcConversion();                     //Capture ADC conversion on ADCINB1(IV)
+    My_AdcChanSelect(2);                                //Select ADCINA2(DBVD) for all SOC
+    DBVD_ad = DBVD_offset = My_AdcConversion();                   //Capture ADC conversion on ADCINA2(DBVD)
+    My_AdcChanSelect(10);                               //Select ADCINB2(Ref3V) for all SOC
+    Ref3V_ad = Ref3V_offset = My_AdcConversion();                  //Capture ADC conversion on ADCINB2(Ref3V)
     EDIS;
 }
 
-void my_AdcChanSelect(Uint16 ch_no)
+void My_AdcChanSelect(Uint16 ch_no)
 {
     AdcRegs.ADCSOC0CTL.bit.CHSEL= ch_no;
     AdcRegs.ADCSOC1CTL.bit.CHSEL= ch_no;
@@ -120,7 +119,8 @@ void my_AdcChanSelect(Uint16 ch_no)
     AdcRegs.ADCSOC15CTL.bit.CHSEL= ch_no;
 } //end AdcChanSelect
 
-Uint16 my_AdcConversion(void)
+#pragma CODE_SECTION(My_AdcConversion, "ramfuncs");       // for real-time operation , so must be run in the RAM
+Uint16 My_AdcConversion(void)
 {
     Uint16 index, SampleSize, Mean, ACQPS_Value;
     Uint32 Sum;

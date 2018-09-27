@@ -1,43 +1,18 @@
 /*
- * 	FileName:	srd_gpio.c
- * 	Project:	SRD_xs
+ * 	FileName:	srm_gpio.c
+ * 	Project:	SRM
  *
- *  Created on: 2018/1/16
- *      Author: yangxiaosheng
+ *  Created on: 2018/3/26
+ *  Author: 	yangxiaosheng
  */
-#include "DSP28x_Project.h"     // Device Headerfile and Examples Include File
-#include "SRD_Project.h"        // User's Funtions
+#include "SRM_Project.h"        // User's Funtions
 
-void my_init_gpio()
+void My_Init_GPIO()
 {
 	InitGpio();
 
 	EALLOW;
 
-	// PU_H
-	GpioCtrlRegs.GPAPUD.bit.GPIO0  = 1;   	// Disable pullup on GPIO
-	GpioCtrlRegs.GPAMUX1.bit.GPIO0 = 0;  	// GPIO mode
-	GpioCtrlRegs.GPADIR.bit.GPIO0  = 1;   	// GPIO = output
-	// PU_L
-	GpioCtrlRegs.GPAPUD.bit.GPIO1  = 1;   	// Disable pullup on GPIO
-	GpioCtrlRegs.GPAMUX1.bit.GPIO1 = 0;  	// GPIO mode
-	GpioCtrlRegs.GPADIR.bit.GPIO1  = 1;   	// GPIO = output
-	// PV_H
-	GpioCtrlRegs.GPAPUD.bit.GPIO2  = 1;   	// Disable pullup on GPIO
-	GpioCtrlRegs.GPAMUX1.bit.GPIO2 = 0;  	// GPIO mode
-	GpioCtrlRegs.GPADIR.bit.GPIO2  = 1;   	// GPIO = output
-	// PV_L
-	GpioCtrlRegs.GPAPUD.bit.GPIO3  = 1;   	// Disable pullup on GPIO
-	GpioCtrlRegs.GPAMUX1.bit.GPIO3 = 0;  	// GPIO mode
-	GpioCtrlRegs.GPADIR.bit.GPIO3  = 1;   	// GPIO = output
-	// PW_H
-	GpioCtrlRegs.GPAPUD.bit.GPIO4  = 1;   	// Disable pullup on GPIO
-	GpioCtrlRegs.GPAMUX1.bit.GPIO4 = 0;  	// GPIO mode
-	GpioCtrlRegs.GPADIR.bit.GPIO4  = 1;   	// GPIO = output
-	// PW_L
-	GpioCtrlRegs.GPAPUD.bit.GPIO5  = 1;   	// Disable pullup on GPIO
-	GpioCtrlRegs.GPAMUX1.bit.GPIO5 = 0;  	// GPIO mode
-	GpioCtrlRegs.GPADIR.bit.GPIO5  = 1;   	// GPIO = output
 	// BR
 	GpioCtrlRegs.GPAPUD.bit.GPIO13  = 0;   	// Enable pullup on GPIO
 	GpioCtrlRegs.GPAMUX1.bit.GPIO13 = 0;  	// GPIO mode
